@@ -51,6 +51,19 @@ var MineData = (function () {
             return false;
     }
 
+    /**
+     * 覆盖砖块
+     */
+    function _cover_bricks() {
+        var size = this.width * this.height;
+
+        for (var i = 0; i < size; i ++) {
+            this.data[ i ] |= 0b01000000;
+        }
+
+        this.uncleanBricks = size;
+    }
+
 	var MineSweepData = function (wid, hgt)
     {
         this.width  = wid;
@@ -59,16 +72,9 @@ var MineData = (function () {
 
         this.mineCount = 0; // 当前存在的地雷数
         this.flag = 0;
+        this.uncleanBricks = 0; // 剩余未清除砖块数量
 
         this.clear();
-        return;
-
-        // 覆盖
-        for (var w = 0; w < wid; w ++) {
-            for (var h = 0; h < hgt; h ++) {
-                this.setBrick(w, h);
-            }
-        }
 	};
 
     MineSweepData.prototype.clear = function () {
@@ -76,6 +82,15 @@ var MineData = (function () {
             this.data[i] = 0;
 
         this.mineCount = 0;
+    };
+
+    /**
+     * 准备开始游戏
+     *
+     * 全部覆盖砖块
+     */
+    MineSweepData.prototype.ready = function () {
+        _cover_bricks.call(this);
     };
 
     /**
@@ -95,6 +110,9 @@ var MineData = (function () {
 		}
     };
 
+    /**
+     * is address valid?
+     */
 	MineSweepData.prototype.IsValid = function (x, y) {
 		return (x >= 0 && x < this.width) && (y >= 0 && y < this.height);
 	};
@@ -103,12 +121,60 @@ var MineData = (function () {
         return (this.data[ y * this.width + x ] & 0b00100000) !== 0;
     };
 
-    MineSweepData.prototype.setBrick = function (x, y) {
-        this.data[ this.width * y + x ] |= 0b01000000;
-    };
+    /**
+     * (自动检查坐标)
+     *
+     * 如果标记为红旗，则不可打开
+     *
+     * 如果已经被打开，则不可重复打开
+     *
+     * 如果覆盖着砖块，就打开砖块
+     *   如果遇到地雷，游戏结束
+     *   如果是空地，则翻开周围砖块
+     *
+     * return boolean
+     */
+    MineSweepData.prototype.cleanBrick = function (x, y) {
 
-    MineSweepData.prototype.clearBrick = function (x, y) {
-        this.data[ this.width * y + x ] &= 0b10111111;
+        if (!this.IsValid(x, y))
+            return false;
+
+        var addr = this.width * y + x;
+
+        // isFlag?
+        if ((this.data[ addr ] & 0b10000000) !== 0)
+            return false;
+
+        // isClean?
+        if ((this.data[ addr ] & 0b01000000) === 0)
+            return false;
+
+
+        // else:
+        // clean brick
+        this.data[ addr ] &= 0b10111111;
+        this.uncleanBricks --;
+
+        // and check what is inside
+        // isMine? game over
+        if ((this.data[ addr ] & 0b00100000) !== 0)
+        {
+            throw new Error; // you are dead
+        }
+        // 向四面八方蔓延, 空地才能自动蔓延
+        else if ((this.data[ addr ] & 0b00001111) === 0)  // isEmpty?
+        {
+            this.cleanBrick(x-1, y  );
+            this.cleanBrick(x-1, y-1);
+            this.cleanBrick(x,   y-1);
+            this.cleanBrick(x+1, y-1);
+            this.cleanBrick(x+1, y  );
+            this.cleanBrick(x+1, y+1);
+            this.cleanBrick(x,   y+1);
+            this.cleanBrick(x-1, y+1);
+        }
+
+        return true;
     };
 
     MineSweepData.prototype.isBrick = function (x, y) {
@@ -124,6 +190,9 @@ var MineData = (function () {
         this.data[ this.width * y + x ] &= 0b01111111;
     };
 
+    /**
+     * 是否标记为红旗
+     */
     MineSweepData.prototype.isFlag = function (x, y) {
         return (this.data[ this.width * y + x ] & 0b10000000) !== 0;
     };

@@ -72,7 +72,9 @@ window.onload = function () {
         y = Math.floor(y / boxSize);
 
         try {
-            if (Mine_TryOpen(x, y)) {
+            // 打开砖块
+            if (mapData.cleanBrick(x, y))
+            {
                 this.update();
             }
         } catch (e) {
@@ -132,54 +134,11 @@ window.onload = function () {
 function GameStart()
 {
     mapData = new MineData(20, 15);
-    //mapData.placeMines(10);
+    mapData.placeMines(10);
+    mapData.ready();
     isGameOver = false;
     widget.move(50, 50);
     widget.resize(mapData.width * boxSize, mapData.height * boxSize);
     widget.show();
-}
-
-function Mine_TryOpen(x, y) {
-
-    // 0.0 is address invalid?
-    if (! mapData.IsValid(x, y))
-        return false;
-
-
-    // 0.1 人为原因不能打开(红旗)
-    if (mapData.isFlag(x, y))
-    {
-        return false;
-    }
-    // 0.2 已经打开过的，不能继续打开(砖块已经被打开)
-    else if (!mapData.isBrick(x, y))
-    {
-        return false;
-    }
-    else 
-    {
-        // 1.2 打开砖块
-        mapData.clearBrick(x, y);
-
-        // 1.3 是否踩到地雷
-        if (mapData.isMine(x, y))
-        {
-            throw new Error; // you are dead
-        }
-
-        // 1.4 向四面八方蔓延, 空地才能自动蔓延
-        if (mapData.getNum(x, y) === 0) {
-            Mine_TryOpen(x-1, y  );
-            Mine_TryOpen(x-1, y-1);
-            Mine_TryOpen(x  , y-1);
-            Mine_TryOpen(x+1, y-1);
-            Mine_TryOpen(x+1, y  );
-            Mine_TryOpen(x+1, y+1);
-            Mine_TryOpen(x  , y+1);
-            Mine_TryOpen(x-1, y+1);
-        }
-
-        return true;
-    }
 }
 
