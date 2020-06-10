@@ -1,6 +1,15 @@
 "use strict";
 
 
+
+/**
+ * usage:
+ *
+ * var map = new MineData(width, height);
+ * map.clear(); 
+ * map.placeMines(num);
+ * map.ready();
+ */
 var MineData = (function () {
 
 	/* private */
@@ -18,15 +27,22 @@ var MineData = (function () {
 
         var pt;
 		while (pt = list.shift()) {
-			if (this.IsValid(pt[0], pt[1]))
+            var x = pt[0];
+            var y = pt[1];
+
+			if (this.IsValid(x, y))
             {
-				if (!this.isMine(pt[0], pt[1]))
+				if (!this.isMine(x, y))
                 {
-                    this.numInc(pt[0], pt[1]);
+                    // 标记周围的地雷数量 ++
+                    //var n = this.data[ this.width * y + x ] & 0b00001111;
+
+                    this.data[ this.width * y + x ] ++; // FIXME
 				}
 			}
 		}
 	}
+
 
 
     /**
@@ -73,8 +89,6 @@ var MineData = (function () {
         this.mineCount = 0; // 当前存在的地雷数
         this.flag = 0;
         this.uncleanBricks = 0; // 剩余未清除砖块数量
-
-        this.clear();
 	};
 
     MineSweepData.prototype.clear = function () {
@@ -132,9 +146,9 @@ var MineData = (function () {
      *   如果遇到地雷，游戏结束
      *   如果是空地，则翻开周围砖块
      *
-     * return boolean
+     * return boolean, throw error
      */
-    MineSweepData.prototype.cleanBrick = function (x, y) {
+    MineSweepData.prototype.clearBrick = function (x, y) {
 
         if (!this.IsValid(x, y))
             return false;
@@ -151,7 +165,7 @@ var MineData = (function () {
 
 
         // else:
-        // clean brick
+        // clear brick
         this.data[ addr ] &= 0b10111111;
         this.uncleanBricks --;
 
@@ -164,14 +178,14 @@ var MineData = (function () {
         // 向四面八方蔓延, 空地才能自动蔓延
         else if ((this.data[ addr ] & 0b00001111) === 0)  // isEmpty?
         {
-            this.cleanBrick(x-1, y  );
-            this.cleanBrick(x-1, y-1);
-            this.cleanBrick(x,   y-1);
-            this.cleanBrick(x+1, y-1);
-            this.cleanBrick(x+1, y  );
-            this.cleanBrick(x+1, y+1);
-            this.cleanBrick(x,   y+1);
-            this.cleanBrick(x-1, y+1);
+            this.clearBrick(x-1, y  );
+            this.clearBrick(x-1, y-1);
+            this.clearBrick(x,   y-1);
+            this.clearBrick(x+1, y-1);
+            this.clearBrick(x+1, y  );
+            this.clearBrick(x+1, y+1);
+            this.clearBrick(x,   y+1);
+            this.clearBrick(x-1, y+1);
         }
 
         return true;
@@ -195,12 +209,6 @@ var MineData = (function () {
      */
     MineSweepData.prototype.isFlag = function (x, y) {
         return (this.data[ this.width * y + x ] & 0b10000000) !== 0;
-    };
-
-    MineSweepData.prototype.numInc = function (x, y) {
-        var n = this.data[ this.width * y + x ] & 0b00001111;
-
-        this.data[ this.width * y + x ] ++; // FIXME
     };
 
     MineSweepData.prototype.getNum = function (x, y) {

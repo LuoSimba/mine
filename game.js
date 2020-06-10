@@ -1,7 +1,7 @@
 
 // global setting
 var boxSize = 32;
-var mapData; // define map
+var mapData = new MineData(20, 15); // define map
 var widget; // game window
 var isGameOver;
 var RES;
@@ -73,7 +73,7 @@ window.onload = function () {
 
         try {
             // 打开砖块
-            if (mapData.cleanBrick(x, y))
+            if (mapData.clearBrick(x, y))
             {
                 this.update();
             }
@@ -133,7 +133,7 @@ window.onload = function () {
 
 function GameStart()
 {
-    mapData = new MineData(20, 15);
+    mapData.clear();
     mapData.placeMines(10);
     mapData.ready();
     isGameOver = false;
