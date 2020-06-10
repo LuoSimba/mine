@@ -4,7 +4,7 @@
 var MineData = (function () {
 
 	/* private */
-	function __num_surround__(x, y) {
+	function _num_surround(x, y) {
 		var list = [
             [x-1, y-1],  // 左上
 		    [x  , y-1],  // 上
@@ -29,91 +29,117 @@ var MineData = (function () {
 	}
 
 
-	var THIS = function (wid, hgt, mineTotal)
+    /**
+     * return boolean
+     */
+    // 避免重复放置
+    function _set_mine(x, y) {
+
+        var addr = this.width * y + x;
+
+        if ((this.data[addr] & 0b00100000) === 0)
+        {
+            this.data[ addr ] |= 0b00100000;
+
+            this.mineCount ++;
+
+            _num_surround.call(this, x, y);
+
+            return true;
+        }
+        else 
+            return false;
+    }
+
+	var MineSweepData = function (wid, hgt)
     {
         this.width  = wid;
         this.height = hgt;
         this.data   = new Uint8Array(this.width * this.height); // ArrayBuffer
 
-        this.mine   = mineTotal;
-        this.flag   = mineTotal;
+        this.mineCount = 0; // 当前存在的地雷数
+        this.flag = 0;
 
-
-        // clear all data
-		for (var i = 0; i < this.data.length; i ++)
-			this.data[i] = 0;
-
-		var mc = this.mine;
-		// 随机放置地雷
-		while (mc > 0) {
-			var x = Util.rnd(this.width);
-			var y = Util.rnd(this.height);
-
-			if (!this.isMine(x, y)) {
-                this.setMine(x, y);
-				__num_surround__.call(this, x, y);
-				mc --;
-			}
-		}
-
+        this.clear();
+        return;
 
         // 覆盖
         for (var w = 0; w < wid; w ++) {
             for (var h = 0; h < hgt; h ++) {
-                this.setBlock(w, h);
+                this.setBrick(w, h);
             }
         }
 	};
 
-	THIS.prototype.IsValid = function (x, y) {
+    MineSweepData.prototype.clear = function () {
+        for (var i = 0; i < this.data.length; i ++)
+            this.data[i] = 0;
+
+        this.mineCount = 0;
+    };
+
+    /**
+     * 随机放置地雷
+     *
+     * max <= this.width * this.height
+     */
+    MineSweepData.prototype.placeMines = function (max) {
+		while (max > 0) {
+			var x = Util.rnd(this.width);
+			var y = Util.rnd(this.height);
+
+			if (_set_mine.call(this, x, y) === true)
+            {
+				max --;
+			}
+		}
+    };
+
+	MineSweepData.prototype.IsValid = function (x, y) {
 		return (x >= 0 && x < this.width) && (y >= 0 && y < this.height);
 	};
 
-    THIS.prototype.isMine = function (x, y) {
+    MineSweepData.prototype.isMine = function (x, y) {
         return (this.data[ y * this.width + x ] & 0b00100000) !== 0;
     };
 
-    THIS.prototype.setMine = function (x, y) {
-        this.data[ this.width * y + x ] |= 0b00100000;
-    };
-
-    THIS.prototype.setBlock = function (x, y) {
+    MineSweepData.prototype.setBrick = function (x, y) {
         this.data[ this.width * y + x ] |= 0b01000000;
     };
 
-    THIS.prototype.clearBlock = function (x, y) {
+    MineSweepData.prototype.clearBrick = function (x, y) {
         this.data[ this.width * y + x ] &= 0b10111111;
     };
 
-    THIS.prototype.isBlock = function (x, y) {
+    MineSweepData.prototype.isBrick = function (x, y) {
         return (this.data[ this.width * y + x ] & 0b01000000) !== 0;
     };
 
     // flag
-    THIS.prototype.setFlag = function (x, y) {
+    MineSweepData.prototype.setFlag = function (x, y) {
         this.data[ this.width * y + x ] |= 0b10000000;
     };
 
-    THIS.prototype.clearFlag = function (x, y) {
+    MineSweepData.prototype.clearFlag = function (x, y) {
         this.data[ this.width * y + x ] &= 0b01111111;
     };
 
-    THIS.prototype.isFlag = function (x, y) {
+    MineSweepData.prototype.isFlag = function (x, y) {
         return (this.data[ this.width * y + x ] & 0b10000000) !== 0;
     };
 
-    THIS.prototype.numInc = function (x, y) {
+    MineSweepData.prototype.numInc = function (x, y) {
         var n = this.data[ this.width * y + x ] & 0b00001111;
 
         this.data[ this.width * y + x ] ++; // FIXME
     };
 
-    THIS.prototype.getNum = function (x, y) {
+    MineSweepData.prototype.getNum = function (x, y) {
         var n = this.data[ this.width * y + x ] & 0b00001111;
 
         return n;
     };
 
-	return THIS;
+	return MineSweepData;
 })();
 

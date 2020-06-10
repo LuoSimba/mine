@@ -20,7 +20,7 @@ window.onload = function () {
 
                 do {
                     // draw blocks.
-                    if (mapData.isBlock(x, y)) {
+                    if (mapData.isBrick(x, y)) {
                         painter.drawImage(boxSize * x, boxSize * y, RES.Get('block'));
                         break;
                     }
@@ -94,7 +94,7 @@ window.onload = function () {
         y = Math.floor(y / boxSize);
 
         // 在砖块存在的情况下才能操作
-        if (mapData.isBlock(x, y))
+        if (mapData.isBrick(x, y))
         {
             if (mapData.isFlag(x, y)) // set flag
             {
@@ -131,7 +131,8 @@ window.onload = function () {
 
 function GameStart()
 {
-    mapData = new MineData(20, 15, 10);
+    mapData = new MineData(20, 15);
+    //mapData.placeMines(10);
     isGameOver = false;
     widget.move(50, 50);
     widget.resize(mapData.width * boxSize, mapData.height * boxSize);
@@ -151,14 +152,14 @@ function Mine_TryOpen(x, y) {
         return false;
     }
     // 0.2 已经打开过的，不能继续打开(砖块已经被打开)
-    else if (!mapData.isBlock(x, y))
+    else if (!mapData.isBrick(x, y))
     {
         return false;
     }
     else 
     {
         // 1.2 打开砖块
-        mapData.clearBlock(x, y);
+        mapData.clearBrick(x, y);
 
         // 1.3 是否踩到地雷
         if (mapData.isMine(x, y))
