@@ -2,10 +2,14 @@
 MineSweep of JavaScript
 
 
+扫雷 js 实现
 
 本地运行，浏览器可能需要加上： --allow-file-access-from-files
 
 
+开发环境：
+    chrome 83
+    win 10
 
 
 TODO:
