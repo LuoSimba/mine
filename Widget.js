@@ -99,28 +99,32 @@ const Widget = (function () {
     // 单击左键
     Widget.prototype.onClick = function (fn) {
 
-        var _WINDOW_ = this;
-
-        this.paintDevice.onclick = function (event) {
-            console.log('[click]');
+        /**
+         * 这里使用 ArrowFunction,
+         * 当这个函数被 onclick 调用时，
+         * this 不再是 this.paintDevice
+         * (this.paintDevice 在调用 onclick)
+         *
+         * this 会是 ArrowFunction 定义时的 this 值
+         * 这里是 Widget 对象
+         */
+        this.paintDevice.onclick = (event) => {
 
             // layerX  NO
             // pageX   NO
             // offsetX YES
 
-            fn.call(_WINDOW_, event.offsetX, event.offsetY);
-
+            fn.call(this, event.offsetX, event.offsetY);
         };
     };
 
     // 单击右键
     Widget.prototype.onContextMenu = function (fn) {
-        var _WINDOW_ = this;
 
-        this.paintDevice.oncontextmenu = function (event) {
+        this.paintDevice.oncontextmenu = (event) => {
             console.log('[context-menu]');
 
-            fn.call(_WINDOW_, event.offsetX, event.offsetY);
+            fn.call(this, event.offsetX, event.offsetY);
 
             return false;
         };
