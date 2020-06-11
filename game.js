@@ -1,3 +1,4 @@
+"use strict";
 
 // global setting
 const BOX_SIZE = 32;
@@ -124,16 +125,14 @@ window.onload = function () {
     RES.DimPic('num_7',   'num_7.png');
     RES.DimPic('num_8',   'num_8.png');
 
-    RES.Start(function () {
-        GameStart();
-    });
+    RES.Start(GameStart);
 };
 
 const GameStart = () => {
     mapData.clear();
     mapData.placeMines(10);
     mapData.ready();
-    widget.move(50, 50);
+    widget.move(30, 30);
     widget.resize(mapData.width * BOX_SIZE, mapData.height * BOX_SIZE);
     widget.show();
 };

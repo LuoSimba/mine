@@ -18,6 +18,7 @@ ResManager.prototype.DimPic = function (key, url) {
 };
 
 ResManager.prototype.Start = function (callback) {
+
 	// 清空原旧图片
 	this.pool = {};
 	this.errorCount   = 0;

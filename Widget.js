@@ -98,6 +98,7 @@ const Widget = (function () {
      */
     // 单击左键
     Widget.prototype.onClick = function (fn) {
+
         var _WINDOW_ = this;
 
         this.paintDevice.onclick = function (event) {
