@@ -69,18 +69,9 @@ const MineData = (function () {
             return false;
     }
 
-    /**
-     * 覆盖砖块
-     */
-    function _cover_bricks() {
-        var size = this.width * this.height;
 
-        for (var i = 0; i < size; i ++) {
-            this.data[ i ] |= 0b01000000;
-        }
 
-        this.uncleanBricks = size;
-    }
+
 
 	const MineSweepData = function (wid, hgt)
     {
@@ -89,7 +80,7 @@ const MineData = (function () {
         this.data   = new Uint8Array(this.width * this.height); // ArrayBuffer
 
         this.mineCount = 0; // 当前存在的地雷数
-        this.flag = 0;
+        this.flagsCount = 0;
         this.uncleanBricks = 0; // 剩余未清除砖块数量
         this.bGameOver = true;
 	};
@@ -103,8 +94,10 @@ const MineData = (function () {
         for (var i = 0; i < this.data.length; i ++)
             this.data[i] = 0;
 
-        this.mineCount = 0;
         this.bGameOver = true;
+        this.uncleanBricks = 0;
+        this.mineCount = 0;
+        this.flagsCount = 0;
     };
 
     /**
@@ -113,9 +106,16 @@ const MineData = (function () {
      * 全部覆盖砖块
      */
     MineSweepData.prototype.ready = function () {
-        _cover_bricks.call(this);
+        const size = this.width * this.height;
+
+        for (let i = 0; i < size; i ++) {
+            // remove all flags & cover with bricks
+            this.data[ i ] = (this.data[i] & 0b01111111) | 0b01000000;
+        }
 
         this.bGameOver = false;
+        this.uncleanBricks = size;
+        this.flagsCount = 0;
     };
 
     /**
