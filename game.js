@@ -2,9 +2,9 @@
 
 // global setting
 const BOX_SIZE = 32;
-var mapData = new MineData(20, 15); // define map
-var widget; // game window
-var RES;
+const RES = new ResManager();
+let mapData = new MineData(20, 15); // define map
+let widget; // game window
 
 window.onload = function () {
 
@@ -18,9 +18,11 @@ window.onload = function () {
         for (let y = 0; y < mapData.height; y ++) {
             for (let x = 0; x < mapData.width; x ++) {
 
+                mapData.seek(x, y);
+
                 do {
                     // draw blocks.
-                    if (mapData.isBrick(x, y)) {
+                    if (mapData.isBrick()) {
                         painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('block'));
                         break;
                     }
@@ -29,22 +31,22 @@ window.onload = function () {
                     // draw ground.
                     painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('ground'));
 
-                    var cellValue = mapData.getNum(x, y);
+                    let digit = mapData.getNum();
                     // 显示地雷
-                    if (mapData.isMine(x, y))
+                    if (mapData.isMine())
                     {
                         painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('mine'));
                     }
                     // 显示数值
-                    else if (cellValue > 0)
+                    else if (digit > 0)
                     {
-                        painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('num_' + cellValue));
+                        painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('num_' + digit));
                     }
 
                     break;
                 } while (true);
 
-                if (mapData.isFlag(x, y)) {
+                if (mapData.isFlag()) {
                     painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('flag'));
                 }
             }
@@ -86,31 +88,28 @@ window.onload = function () {
      * 放置旗帜
      */
     widget.onContextMenu(function (x, y) {
-        
+
         if (mapData.isGameOver())
             return;
-
 
         x = Math.floor(x / BOX_SIZE);
         y = Math.floor(y / BOX_SIZE);
 
-        // 在砖块存在的情况下才能操作
-        if (mapData.isBrick(x, y))
-        {
-            if (mapData.isFlag(x, y)) // set flag
-            {
-                mapData.clearFlag(x, y);
-            }
-            else
-            {
-                mapData.setFlag(x, y);
-            }
+        if (!mapData.IsValid(x, y))
+            return;
 
-            this.update();
+        mapData.seek(x, y);
+
+        try {
+            if (mapData.toggleFlag())
+            {
+                this.update();
+            }
+        } catch (e) {
+            this.update(); // 这里一定是成功结束
         }
     });
 
-    RES = new ResManager();
     RES.DimPic('block',  'block.png');
     RES.DimPic('ground', 'ground.png');
     RES.DimPic('flag',   'flag.png');
