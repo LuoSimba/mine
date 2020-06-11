@@ -9,6 +9,8 @@
  * map.clear(); 
  * map.placeMines(num);
  * map.ready();
+ *
+ * use `map.isGameOver()' to check whether game is over
  */
 const MineData = (function () {
 
@@ -92,11 +94,17 @@ const MineData = (function () {
         this.bGameOver = true;
 	};
 
+    /**
+     * 清理战场
+     *
+     * RULE: 清理战场则游戏必须重置为结束状态
+     */
     MineSweepData.prototype.clear = function () {
         for (var i = 0; i < this.data.length; i ++)
             this.data[i] = 0;
 
         this.mineCount = 0;
+        this.bGameOver = true;
     };
 
     /**
@@ -110,6 +118,9 @@ const MineData = (function () {
         this.bGameOver = false;
     };
 
+    /**
+     * whether game is over
+     */
     MineSweepData.prototype.isGameOver = function () {
         return this.bGameOver;
     };
@@ -118,17 +129,27 @@ const MineData = (function () {
      * 随机放置地雷
      *
      * max <= this.width * this.height
+     *
+     * RULE: 游戏开始阶段，不能放置地雷
+     *
+     * throw error
      */
     MineSweepData.prototype.placeMines = function (max) {
-		while (max > 0) {
-			var x = Util.rnd(this.width);
-			var y = Util.rnd(this.height);
 
-			if (_set_mine.call(this, x, y) === true)
-            {
-				max --;
-			}
-		}
+        if (this.isGameOver()) 
+        {
+            while (max > 0) {
+                var x = Util.rnd(this.width);
+                var y = Util.rnd(this.height);
+
+                if (_set_mine.call(this, x, y) === true)
+                {
+                    max --;
+                }
+            }
+        }
+        else 
+            throw new Error('forbidden when game in progress');
     };
 
     /**
@@ -181,7 +202,7 @@ const MineData = (function () {
         if ((this.data[ addr ] & 0b00100000) !== 0)
         {
             this.bGameOver = true;
-            throw new Error; // you are dead
+            throw new Error('boom~'); // you are dead
         }
         // 向四面八方蔓延, 空地才能自动蔓延
         else if ((this.data[ addr ] & 0b00001111) === 0)  // isEmpty?
