@@ -3,7 +3,6 @@
 const BOX_SIZE = 32;
 var mapData = new MineData(20, 15); // define map
 var widget; // game window
-var isGameOver;
 var RES;
 
 window.onload = function () {
@@ -52,7 +51,7 @@ window.onload = function () {
 
 
         // if game over
-        if (isGameOver) {
+        if (mapData.isGameOver()) {
             painter.save();
             painter.setFont('新宋体', 30, true);
             painter.drawText(100, 100, "GAME OVER");
@@ -65,7 +64,7 @@ window.onload = function () {
      */
     widget.onClick(function (x, y) {
 
-        if (isGameOver)
+        if (mapData.isGameOver())
             return;
 
         x = Math.floor(x / BOX_SIZE);
@@ -78,7 +77,6 @@ window.onload = function () {
                 this.update();
             }
         } catch (e) {
-            isGameOver = true;
             this.update();
         }
     });
@@ -88,7 +86,7 @@ window.onload = function () {
      */
     widget.onContextMenu(function (x, y) {
         
-        if (isGameOver)
+        if (mapData.isGameOver())
             return;
 
 
@@ -136,7 +134,6 @@ function GameStart()
     mapData.clear();
     mapData.placeMines(10);
     mapData.ready();
-    isGameOver = false;
     widget.move(50, 50);
     widget.resize(mapData.width * BOX_SIZE, mapData.height * BOX_SIZE);
     widget.show();

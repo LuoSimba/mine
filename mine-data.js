@@ -89,6 +89,7 @@ const MineData = (function () {
         this.mineCount = 0; // 当前存在的地雷数
         this.flag = 0;
         this.uncleanBricks = 0; // 剩余未清除砖块数量
+        this.bGameOver = true;
 	};
 
     MineSweepData.prototype.clear = function () {
@@ -105,6 +106,12 @@ const MineData = (function () {
      */
     MineSweepData.prototype.ready = function () {
         _cover_bricks.call(this);
+
+        this.bGameOver = false;
+    };
+
+    MineSweepData.prototype.isGameOver = function () {
+        return this.bGameOver;
     };
 
     /**
@@ -173,6 +180,7 @@ const MineData = (function () {
         // isMine? game over
         if ((this.data[ addr ] & 0b00100000) !== 0)
         {
+            this.bGameOver = true;
             throw new Error; // you are dead
         }
         // 向四面八方蔓延, 空地才能自动蔓延
