@@ -15,8 +15,8 @@ window.onload = function () {
      */
     widget.render = function (painter) {
 
-        for (var y = 0; y < mapData.height; y ++) {
-            for (var x = 0; x < mapData.width; x ++) {
+        for (let y = 0; y < mapData.height; y ++) {
+            for (let x = 0; x < mapData.width; x ++) {
 
                 do {
                     // draw blocks.

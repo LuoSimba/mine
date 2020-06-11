@@ -56,11 +56,7 @@ Painter.prototype.translate = function (x, y) {
 };
 
 Painter.prototype.setFont = function (fontName, fontSize, bold) {
-    var boldexpr;
-    if (bold === true)
-        boldexpr = 'bold ';
-    else 
-        boldexpr = '';
+    let boldexpr = (bold === true) ? 'bold ' : '';
 
     /* bold 10px impack */
     this.ctx.font = boldexpr + fontSize + "px " + fontName;

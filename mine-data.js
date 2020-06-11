@@ -25,10 +25,10 @@ const MineData = (function () {
 		    [x+1, y+1]   // 右下
         ];
 
-        var pt;
+        let pt;
 		while (pt = list.shift()) {
-            var x = pt[0];
-            var y = pt[1];
+            let x = pt[0];
+            let y = pt[1];
 
 			if (this.IsValid(x, y))
             {
@@ -80,7 +80,7 @@ const MineData = (function () {
         this.uncleanBricks = size;
     }
 
-	var MineSweepData = function (wid, hgt)
+	const MineSweepData = function (wid, hgt)
     {
         this.width  = wid;
         this.height = hgt;

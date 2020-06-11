@@ -7,7 +7,7 @@ const Widget = (function () {
     /**
      * 窗口类
      */
-	var Widget = function () {
+	const Widget = function () {
 
 		// 创建窗口
 		this.wnd = document.createElement('div');
