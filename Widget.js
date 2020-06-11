@@ -1,7 +1,7 @@
 "use strict";
 
 
-var Widget = (function () {
+const Widget = (function () {
 
 
     /**

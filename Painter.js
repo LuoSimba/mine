@@ -2,7 +2,7 @@
 /**
  * 绘图类
  */
-var Painter = function (device) {
+const Painter = function (device) {
 
     this.ctx = device.getContext('2d');
 

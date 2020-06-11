@@ -1,6 +1,6 @@
 
 // global setting
-var boxSize = 32;
+const BOX_SIZE = 32;
 var mapData = new MineData(20, 15); // define map
 var widget; // game window
 var isGameOver;
@@ -21,31 +21,31 @@ window.onload = function () {
                 do {
                     // draw blocks.
                     if (mapData.isBrick(x, y)) {
-                        painter.drawImage(boxSize * x, boxSize * y, RES.Get('block'));
+                        painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('block'));
                         break;
                     }
 
 
                     // draw ground.
-                    painter.drawImage(boxSize * x, boxSize * y, RES.Get('ground'));
+                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('ground'));
 
                     var cellValue = mapData.getNum(x, y);
                     // 显示地雷
                     if (mapData.isMine(x, y))
                     {
-                        painter.drawImage(boxSize * x, boxSize * y, RES.Get('mine'));
+                        painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('mine'));
                     }
                     // 显示数值
                     else if (cellValue > 0)
                     {
-                        painter.drawImage(boxSize * x, boxSize * y, RES.Get('num_' + cellValue));
+                        painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('num_' + cellValue));
                     }
 
                     break;
                 } while (true);
 
                 if (mapData.isFlag(x, y)) {
-                    painter.drawImage(boxSize * x, boxSize * y, RES.Get('flag'));
+                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('flag'));
                 }
             }
         }
@@ -68,8 +68,8 @@ window.onload = function () {
         if (isGameOver)
             return;
 
-        x = Math.floor(x / boxSize);
-        y = Math.floor(y / boxSize);
+        x = Math.floor(x / BOX_SIZE);
+        y = Math.floor(y / BOX_SIZE);
 
         try {
             // 打开砖块
@@ -92,8 +92,8 @@ window.onload = function () {
             return;
 
 
-        x = Math.floor(x / boxSize);
-        y = Math.floor(y / boxSize);
+        x = Math.floor(x / BOX_SIZE);
+        y = Math.floor(y / BOX_SIZE);
 
         // 在砖块存在的情况下才能操作
         if (mapData.isBrick(x, y))
@@ -138,7 +138,7 @@ function GameStart()
     mapData.ready();
     isGameOver = false;
     widget.move(50, 50);
-    widget.resize(mapData.width * boxSize, mapData.height * boxSize);
+    widget.resize(mapData.width * BOX_SIZE, mapData.height * BOX_SIZE);
     widget.show();
 }
 

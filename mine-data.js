@@ -10,7 +10,7 @@
  * map.placeMines(num);
  * map.ready();
  */
-var MineData = (function () {
+const MineData = (function () {
 
 	/* private */
 	function _num_surround(x, y) {

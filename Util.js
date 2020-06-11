@@ -1,6 +1,6 @@
 
 
-var Util = function () {};
+const Util = function () {};
 
 Util.rnd = function (max) {
     return Math.floor(

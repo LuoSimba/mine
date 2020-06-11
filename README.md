@@ -20,4 +20,7 @@ TODO:
 * 没有时间计算
 
 
+changelog:
+
+0611 - 使用 const 定义常量 (ECMA 13.3.1)
 
