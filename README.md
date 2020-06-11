@@ -23,4 +23,5 @@ TODO:
 changelog:
 
 0611 - 使用 const, let (ECMA 13.3.1)
+       使用 arrow function (ECMA 14.2)
 

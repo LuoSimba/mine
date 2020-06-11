@@ -129,13 +129,12 @@ window.onload = function () {
     });
 };
 
-function GameStart()
-{
+const GameStart = () => {
     mapData.clear();
     mapData.placeMines(10);
     mapData.ready();
     widget.move(50, 50);
     widget.resize(mapData.width * BOX_SIZE, mapData.height * BOX_SIZE);
     widget.show();
-}
+};
 
