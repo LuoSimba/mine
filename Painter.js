@@ -63,7 +63,8 @@ Painter.prototype.setFont = function (fontName, fontSize, bold = false) {
     let boldexpr = (bold === true) ? 'bold ' : '';
 
     /* bold 10px impack */
-    this.ctx.font = boldexpr + fontSize + "px " + fontName;
+    // Template String
+    this.ctx.font = `${boldexpr} ${fontSize}px ${fontName}`;
 };
 
 Painter.prototype.save = function () {
