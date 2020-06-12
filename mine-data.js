@@ -29,8 +29,9 @@ const MineData = (function () {
 
         let pt;
 		while (pt = list.shift()) {
-            let x = pt[0];
-            let y = pt[1];
+
+            // 数组的解构赋值
+            const [x, y] = pt;
 
 			if (this.IsValid(x, y))
             {
