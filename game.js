@@ -52,7 +52,6 @@ window.onload = function () {
             }
         }
 
-
         // if game over
         if (mapData.isGameOver()) {
             painter.save();

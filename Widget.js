@@ -6,14 +6,15 @@ const Widget = (function () {
 
     /**
      * 窗口类
+     *
+     * 窗口默认没有边框，有利于坐标计算
      */
 	const Widget = function () {
 
 		// 创建窗口
         // 创建画布(窗口本身就是画布)
 		this.device = document.createElement('canvas');
-        // overflow:hidden;
-        this.device.style.cssText = 'position:absolute; background:white; border:1px solid rgba(0,0,0,.6); box-shadow:2px 2px 3px rgba(0,0,0,.4); display:none;';
+        this.device.style.cssText = 'position:absolute; background:white; box-shadow:2px 2px 3px rgba(0,0,0,.4); display:none;';
 
         this.painter = new Painter(this.device);
 
