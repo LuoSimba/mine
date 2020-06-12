@@ -127,6 +127,7 @@ window.onload = function () {
     RES.Start(GameStart);
 };
 
+
 const GameStart = () => {
     mapData.clear();
     mapData.placeMines(10);
@@ -135,4 +136,5 @@ const GameStart = () => {
     widget.resize(mapData.width * BOX_SIZE, mapData.height * BOX_SIZE);
     widget.show();
 };
+
 
