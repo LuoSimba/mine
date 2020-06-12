@@ -85,7 +85,7 @@ const Widget = (function () {
             console.log('[render]');
 
             this.painter.save();
-            this.render(this.painter);
+            this.render(this);
             this.painter.restore();
         }
     };

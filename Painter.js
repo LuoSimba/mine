@@ -55,7 +55,11 @@ Painter.prototype.translate = function (x, y) {
     this.ctx.translate(x, y);
 };
 
-Painter.prototype.setFont = function (fontName, fontSize, bold) {
+/**
+ * bold 参数设置了缺省值
+ */
+Painter.prototype.setFont = function (fontName, fontSize, bold = false) {
+
     let boldexpr = (bold === true) ? 'bold ' : '';
 
     /* bold 10px impack */

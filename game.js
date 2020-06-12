@@ -14,7 +14,7 @@ window.onload = function () {
     /**
      * 绘制界面
      */
-    widget.render = function (painter) {
+    widget.render = function ({painter}) {
 
         for (let y = 0; y < mapData.height; y ++) {
             for (let x = 0; x < mapData.width; x ++) {
@@ -110,14 +110,17 @@ window.onload = function () {
     // --
     statusBar = new Widget;
 
-    statusBar.render = function (painter) {
+    statusBar.render = function ({painter}) {
 
         // 剩余可用红旗数
         const flagsLeft = mapData.mineCount - mapData.flagsCount;
 
         painter.clearRect(0, 0, this.width(), this.height());
 
+        painter.save();
+        painter.setFont('新宋体', 12, false);
         painter.drawText(10, 40, "FLAG:" + flagsLeft);
+        painter.restore();
 
         // if game over
         if (mapData.isGameOver()) {
