@@ -5,6 +5,7 @@ const BOX_SIZE = 32;
 const RES = new ResManager();
 let mapData = new MineData(20, 15); // define map
 let widget; // game window
+let statusBar;
 
 window.onload = function () {
 
@@ -51,14 +52,6 @@ window.onload = function () {
                 }
             }
         }
-
-        // if game over
-        if (mapData.isGameOver()) {
-            painter.save();
-            painter.setFont('新宋体', 30, true);
-            painter.drawText(100, 100, "GAME OVER");
-            painter.restore();
-        }
     };
 
     /**
@@ -77,9 +70,11 @@ window.onload = function () {
             if (mapData.clearBrick(x, y))
             {
                 this.update();
+                statusBar.update();
             }
         } catch (e) {
             this.update();
+            statusBar.update();
         }
     });
 
@@ -103,10 +98,38 @@ window.onload = function () {
             if (mapData.toggleFlag())
             {
                 this.update();
+                statusBar.update();
             }
         } catch (e) {
             this.update(); // 这里一定是成功结束
+            statusBar.update();
         }
+    });
+
+
+    // --
+    statusBar = new Widget;
+
+    statusBar.render = function (painter) {
+
+        // 剩余可用红旗数
+        const flagsLeft = mapData.mineCount - mapData.flagsCount;
+
+        painter.clearRect(0, 0, this.width(), this.height());
+
+        painter.drawText(10, 40, "FLAG:" + flagsLeft);
+
+        // if game over
+        if (mapData.isGameOver()) {
+            painter.save();
+            painter.setFont('新宋体', 30, true);
+            painter.drawText(100, 40, "GAME OVER");
+            painter.restore();
+        }
+    };
+
+    statusBar.onClick(function (x, y) {
+        GameStart();
     });
 
     RES.DimPic('block',  'block.png');
@@ -131,9 +154,18 @@ const GameStart = () => {
     mapData.clear();
     mapData.placeMines(10);
     mapData.ready();
+
+    const win_width  = mapData.width  * BOX_SIZE;
+    const win_height = mapData.height * BOX_SIZE;
+
+    // -- show multi windows
     widget.move(30, 30);
-    widget.resize(mapData.width * BOX_SIZE, mapData.height * BOX_SIZE);
+    widget.resize(win_width, win_height);
     widget.show();
+
+    statusBar.move(30, 30 + win_height + 10);
+    statusBar.resize(win_width, 50);
+    statusBar.show();
 };
 
 
