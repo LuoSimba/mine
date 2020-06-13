@@ -66,12 +66,21 @@ window.onload = function () {
         y = Math.floor(y / BOX_SIZE);
 
         try {
-            // 打开砖块
-            if (mapData.clearBrick(x, y))
-            {
+            mapData.seek(x, y);
+
+            if (mapData.isFlag()) {
+                // do nothing, 红旗不可操作
+            } else if (mapData.isBrick()) {
+                // 打开砖块
+                mapData.clearBrick();
                 this.update();
                 statusBar.update();
+            } else if (mapData.getNum() > 0) {
+                console.log('num~~~'); // TODO
+            } else {
+                // 剩下的都是空地，不能点击
             }
+
         } catch (e) {
             GameException(e);
         }

@@ -87,6 +87,54 @@ const MineData = (function () {
     }
 
 
+    /**
+     * 清除砖块
+     *
+     * RULE: 如果当前位置越界，直接返回
+     * RULE: 红旗位置受保护，直接返回
+     * RULE: 如果当前位置已经清除，直接返回
+     * RULE: 如果当前位置为地雷，则游戏结束
+     * RULE: 如果当前位置为空，自动清理周围砖块
+     *
+     */
+    function _clear_brick(x, y) {
+        if (!this.IsValid(x, y))
+            return;
+
+        let data = this.data[ this.width * y + x ];
+
+        // isFlag
+        if ((data & 0b10000000) !== 0)
+            return;
+
+        // isClean
+        if ((data & 0b01000000) === 0)
+            return;
+
+        // clear brick
+        data &= 0b10111111;
+        this.data[ this.width * y + x ] = data;
+        this.uncleanBricks --;
+
+        // see what's under the brick
+        // isMine? then you are dead
+        if ((data & 0b00100000) !== 0)
+        {
+            this.bGameOver = true;
+            throw MINE_GAME_OVER;
+        }
+        else if ((data & 0b00001111) === 0) // isEmpty?
+        {
+            _clear_brick.call(this, x-1, y  );
+            _clear_brick.call(this, x-1, y-1);
+            _clear_brick.call(this, x,   y-1);
+            _clear_brick.call(this, x+1, y-1);
+            _clear_brick.call(this, x+1, y  );
+            _clear_brick.call(this, x+1, y+1);
+            _clear_brick.call(this, x,   y+1);
+            _clear_brick.call(this, x-1, y+1);
+        }
+    }
 
 
 
@@ -203,9 +251,8 @@ const MineData = (function () {
     /**
      * (自动检查坐标)
      *
-     * 如果标记为红旗，则不可打开
-     *
-     * 如果已经被打开，则不可重复打开
+     * 如果标记为红旗，则报错
+     * 如果已经被打开，则报错
      *
      * 如果覆盖着砖块，就打开砖块
      *   如果遇到地雷，游戏结束
@@ -213,48 +260,19 @@ const MineData = (function () {
      *
      * return boolean, throw symbol
      */
-    MineSweepData.prototype.clearBrick = function (x, y) {
+    MineSweepData.prototype.clearBrick = function () {
 
-        if (!this.IsValid(x, y))
-            return false;
-
-        let addr = this.width * y + x;
+        const data = this.data[ this.addr ];
 
         // isFlag?
-        if ((this.data[ addr ] & 0b10000000) !== 0)
-            return false;
+        if ((data & 0b10000000) !== 0)
+            throw MINE_LOGIC_ERROR;
 
         // isClean?
-        if ((this.data[ addr ] & 0b01000000) === 0)
-            return false;
+        if ((data & 0b01000000) === 0)
+            throw MINE_LOGIC_ERROR;
 
-
-        // else:
-        // clear brick
-        this.data[ addr ] &= 0b10111111;
-        this.uncleanBricks --;
-
-        // and check what is inside
-        // isMine? game over
-        if ((this.data[ addr ] & 0b00100000) !== 0)
-        {
-            this.bGameOver = true;
-            throw MINE_GAME_OVER;
-        }
-        // 向四面八方蔓延, 空地才能自动蔓延
-        else if ((this.data[ addr ] & 0b00001111) === 0)  // isEmpty?
-        {
-            this.clearBrick(x-1, y  );
-            this.clearBrick(x-1, y-1);
-            this.clearBrick(x,   y-1);
-            this.clearBrick(x+1, y-1);
-            this.clearBrick(x+1, y  );
-            this.clearBrick(x+1, y+1);
-            this.clearBrick(x,   y+1);
-            this.clearBrick(x-1, y+1);
-        }
-
-        return true;
+        _clear_brick.call(this, this.x, this.y);
     };
 
     /**
