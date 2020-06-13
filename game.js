@@ -13,22 +13,22 @@ window.onload = function () {
 
     /**
      * 绘制界面
+     *
+     * 游戏结束的显示方式有点不一样
      */
     widget.render = function ({painter}) {
+
+        const isGameOver = mapData.isGameOver();
 
         for (let y = 0; y < mapData.height; y ++) {
             for (let x = 0; x < mapData.width; x ++) {
 
                 mapData.seek(x, y);
 
-                do {
-                    // draw blocks.
-                    if (mapData.isBrick()) {
-                        painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('block'));
-                        break;
-                    }
-
-
+                // draw blocks.
+                if (mapData.isBrick()) {
+                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('block'));
+                } else {
                     // draw ground.
                     painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('ground'));
 
@@ -43,10 +43,9 @@ window.onload = function () {
                     {
                         painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('num_' + digit));
                     }
+                }
 
-                    break;
-                } while (true);
-
+                // 绘制红旗
                 if (mapData.isFlag()) {
                     painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('flag'));
                 }
