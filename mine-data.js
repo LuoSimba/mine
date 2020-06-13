@@ -144,8 +144,9 @@ const MineData = (function () {
         this.height = hgt;
         this.data   = new Uint8Array(this.width * this.height); // ArrayBuffer
 
-        this.mineCount = 0; // 当前存在的地雷数
-        this.flagsCount = 0;
+        this.mineCount = 0;     // 当前存在的地雷数
+        this.flagsCount = 0;    // 当前已用的红旗数
+        this.flagsCountYes = 0; // 有效红旗数
         this.uncleanBricks = 0; // 剩余未清除砖块数量
         this.bGameOver = true;
 
@@ -184,6 +185,7 @@ const MineData = (function () {
         this.uncleanBricks = 0;
         this.mineCount = 0;
         this.flagsCount = 0;
+        this.flagsCountYes = 0;
     };
 
     /**
@@ -202,6 +204,7 @@ const MineData = (function () {
         this.bGameOver = false;
         this.uncleanBricks = size;
         this.flagsCount = 0;
+        this.flagsCountYes = 0;
 
         this.x = 0;
         this.y = 0;
@@ -228,6 +231,7 @@ const MineData = (function () {
 
         if (!this.isGameOver())
             throw MINE_LOGIC_ERROR;
+
 
         while (max > 0) {
 
@@ -274,10 +278,10 @@ const MineData = (function () {
 
         _clear_brick.call(this, this.x, this.y);
 
-        // 检查是否完成任务(条件和放置红旗的检查条件一模一样)
-        if (this.flagsCount === this.mineCount
-            && this.flagsCount === this.uncleanBricks)
-        {
+        // 检查是否完成任务
+        // 如果剩余砖块数，等于地雷数，那么地雷一定就在
+        // 这些砖块下
+        if (this.uncleanBricks === this.mineCount) {
             this.bGameOver = true;
             throw MINE_GAME_OVER;
         }
@@ -309,24 +313,32 @@ const MineData = (function () {
         {
             if (this.isFlag())
             {
-                // clear flag
-                this.data[ this.addr ] &= 0b01111111;
+                this.data[ this.addr ] &= 0b01111111; // clear flag
                 this.flagsCount --;
+
+                if (this.isMine())
+                    this.flagsCountYes --;
+
                 return true;
             }
+            // 红旗数量是有限资源，不能超过地雷数量
             else if (this.flagsCount < this.mineCount)
             {
-                // set flag 
-                // 红旗数量是有限资源，不能超过地雷数量
-                this.data[ this.addr ] |= 0b10000000;
+                this.data[ this.addr ] |= 0b10000000; // set flag
                 this.flagsCount ++;
 
-                // 检查是否完成任务
-                if (this.flagsCount === this.mineCount
-                    && this.flagsCount === this.uncleanBricks)
-                {
-                    this.bGameOver = true;
-                    throw MINE_GAME_OVER;
+
+                if (this.isMine()) {
+                    this.flagsCountYes ++;
+
+                    // 检查是否完成任务
+                    // 不用在意砖块是否都已翻开
+                    // 只要红旗指出了所有的地雷位置就算胜利
+                    if (this.flagsCountYes === this.mineCount)
+                    {
+                        this.bGameOver = true;
+                        throw MINE_GAME_OVER;
+                    }
                 }
 
                 return true; // changed successfully

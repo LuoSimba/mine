@@ -82,8 +82,6 @@ const Widget = (function () {
      */
     Widget.prototype.update = function () {
         if (this.visible && this.render !== null) {
-            console.log('[render]');
-
             this.painter.save();
             this.render(this);
             this.painter.restore();
