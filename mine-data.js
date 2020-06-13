@@ -273,6 +273,14 @@ const MineData = (function () {
             throw MINE_LOGIC_ERROR;
 
         _clear_brick.call(this, this.x, this.y);
+
+        // 检查是否完成任务(条件和放置红旗的检查条件一模一样)
+        if (this.flagsCount === this.mineCount
+            && this.flagsCount === this.uncleanBricks)
+        {
+            this.bGameOver = true;
+            throw MINE_GAME_OVER;
+        }
     };
 
     /**
