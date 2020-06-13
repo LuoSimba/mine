@@ -272,6 +272,12 @@ const MineData = (function () {
             nearby.forEach(
                 ([x, y]) => _clear_brick.call(this, x, y)
             );
+
+            if (this.uncleanBricks === this.mineCount) {
+                this.bGameOver = true;
+                throw MINE_GAME_OVER;
+            }
+
             return true;
         }
         else
