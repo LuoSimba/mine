@@ -1,6 +1,21 @@
 "use strict";
 
 
+/**
+ * 游戏结束，无论成功或失败。
+ */
+const MINE_GAME_OVER   = Symbol('game over');
+/**
+ * 使用了非法坐标
+ */
+const MINE_INVALID_POS = Symbol('invalid position');
+/**
+ * 其他逻辑错误，违反规定操作
+ *
+ * 比如：
+ * 1. 游戏已经开始，仍然尝试设置地雷
+ */
+const MINE_LOGIC_ERROR = Symbol('logic error');
 
 /**
  * usage:
@@ -94,6 +109,8 @@ const MineData = (function () {
 
     /**
      * 设置当前定位
+     *
+     * throw symbol
      */
     MineSweepData.prototype.seek = function (x, y) {
 
@@ -103,7 +120,7 @@ const MineData = (function () {
             this.addr = this.width * this.y + this.x;
         }
         else 
-            throw new Error('invalid coord');
+            throw MINE_INVALID_POS;
     };
 
     /**
@@ -157,25 +174,23 @@ const MineData = (function () {
      *
      * RULE: 游戏开始阶段，不能放置地雷
      *
-     * throw error
+     * throw symbol
      */
     MineSweepData.prototype.placeMines = function (max) {
 
-        if (this.isGameOver()) {
+        if (!this.isGameOver())
+            throw MINE_LOGIC_ERROR;
 
-            while (max > 0) {
+        while (max > 0) {
 
-                let x = Util.rnd(this.width);
-                let y = Util.rnd(this.height);
+            let x = Util.rnd(this.width);
+            let y = Util.rnd(this.height);
 
-                if (_set_mine.call(this, x, y) === true)
-                {
-                    max --;
-                }
+            if (_set_mine.call(this, x, y) === true)
+            {
+                max --;
             }
         }
-        else 
-            throw new Error('forbidden when game in progress');
     };
 
     /**
@@ -196,7 +211,7 @@ const MineData = (function () {
      *   如果遇到地雷，游戏结束
      *   如果是空地，则翻开周围砖块
      *
-     * return boolean, throw error
+     * return boolean, throw symbol
      */
     MineSweepData.prototype.clearBrick = function (x, y) {
 
@@ -224,7 +239,7 @@ const MineData = (function () {
         if ((this.data[ addr ] & 0b00100000) !== 0)
         {
             this.bGameOver = true;
-            throw new Error('boom~'); // you are dead
+            throw MINE_GAME_OVER;
         }
         // 向四面八方蔓延, 空地才能自动蔓延
         else if ((this.data[ addr ] & 0b00001111) === 0)  // isEmpty?
@@ -245,7 +260,6 @@ const MineData = (function () {
     /**
      * 当前位置是否为砖块
      *
-     * see this.seek()
      */
     MineSweepData.prototype.isBrick = function () {
         return (this.data[ this.addr ] & 0b01000000) !== 0;
@@ -286,7 +300,7 @@ const MineData = (function () {
                     && this.flagsCount === this.uncleanBricks)
                 {
                     this.bGameOver = true;
-                    throw new Error('success~');  // 游戏完成
+                    throw MINE_GAME_OVER;
                 }
 
                 return true; // changed successfully

@@ -73,8 +73,7 @@ window.onload = function () {
                 statusBar.update();
             }
         } catch (e) {
-            this.update();
-            statusBar.update();
+            GameException(e);
         }
     });
 
@@ -92,17 +91,17 @@ window.onload = function () {
         if (!mapData.IsValid(x, y))
             return;
 
-        mapData.seek(x, y);
 
         try {
+            mapData.seek(x, y);
+
             if (mapData.toggleFlag())
             {
                 this.update();
                 statusBar.update();
             }
         } catch (e) {
-            this.update(); // 这里一定是成功结束
-            statusBar.update();
+            GameException(e);
         }
     });
 
@@ -172,4 +171,21 @@ const GameStart = () => {
     statusBar.show();
 };
 
+const GameException = (e) => {
+
+    switch (e) {
+        case MINE_GAME_OVER:
+            widget.update();
+            statusBar.update();
+            break;
+        case MINE_INVALID_POS:
+            alert('坐标超出范围');
+            throw e;
+        case MINE_LOGIC_ERROR:
+            alert('严重错误');
+            throw e;
+        default:
+            throw e;
+    }
+};
 
