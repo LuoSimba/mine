@@ -75,7 +75,12 @@ window.onload = function () {
                 this.update();
                 statusBar.update();
             } else if (mapData.getNum() > 0) {
-                console.log('num~~~'); // TODO
+
+                if (mapData.clearNearby()) {
+                    this.update();
+                    statusBar.update();
+                }
+
             } else {
                 // 剩下的都是空地，不能点击
             }

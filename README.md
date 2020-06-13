@@ -17,11 +17,13 @@ TODO:
 * 标记为 "?"
 * 结果没有明确显示输赢
 * 没有时间计算
-* 没有点击数字的功能
 
 
 
 changelog:
+
+0614 - 使用 Array.filter Array.map Array.reduce Array.forEach (ECMA 22.1.3)
+       支持点击数字，翻开周围砖块
 
 0613 - 使用 Symbol 抛出异常 (ECMA 6.1.5)
        可以正常触发游戏结束

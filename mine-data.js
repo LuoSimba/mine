@@ -137,6 +137,25 @@ const MineData = (function () {
     }
 
 
+    function _nearby_positions(x, y) {
+        // 周围的坐标
+        const list = [
+            [x-1, y-1],
+            [x, y-1],
+            [x+1, y-1],
+            [x-1, y],
+            [x+1, y],
+            [x-1, y+1],
+            [x, y+1],
+            [x+1, y+1],
+        ];
+
+        const list2 = list.filter(
+            ([x, y]) => this.IsValid(x, y)
+        );
+
+        return list2;
+    }
 
 	const MineSweepData = function (wid, hgt) {
 
@@ -216,6 +235,47 @@ const MineData = (function () {
      */
     MineSweepData.prototype.isGameOver = function () {
         return this.bGameOver;
+    };
+
+    /**
+     * 清理周围的砖块
+     *
+     * RULE: 只能对数值区域操作
+     *
+     * RULE: 只有周围红旗数和当前数值对应才会进行
+     */
+    MineSweepData.prototype.clearNearby = function () {
+        // 当前位置的数值
+        const n2 = mapData.getNum();
+
+        if (n2 <= 0)
+            throw MINE_LOGIC_ERROR;
+
+        const nearby = _nearby_positions.call(this, this.x, this.y);
+
+        // isFlag
+        const list = nearby.map(
+            ([x, y]) => {
+                return (this.data[ this.width * y + x ] & 0b10000000) === 0 ? 
+                    0 : 1
+            }
+        );
+
+        // 周围的红旗总数
+        const n = list.reduce(
+            (p,c) => p + c
+        );
+
+        // 红旗数和当前数值不一致
+        if (n2 === n)
+        {
+            nearby.forEach(
+                ([x, y]) => _clear_brick.call(this, x, y)
+            );
+            return true;
+        }
+        else
+            return false;
     };
 
     /**
