@@ -3,7 +3,7 @@
 // global setting
 const BOX_SIZE = 32;
 const RES = new ResManager();
-let mapData = new MineData(20, 15); // define map
+let mapData = new MineData(20, 15); // define map(20, 15)
 let widget; // game window
 let statusBar;
 
@@ -67,21 +67,23 @@ window.onload = function () {
         try {
             mapData.seek(x, y);
 
-            if (mapData.isFlag()) {
+            if (mapData.isFlag())
+            {
                 // do nothing, 红旗不可操作
-            } else if (mapData.isBrick()) {
+            }
+            else if (mapData.isBrick())
+            {
                 // 打开砖块
                 mapData.clearBrick();
-                this.update();
-                statusBar.update();
-            } else if (mapData.getNum() > 0) {
+            }
+            else if (mapData.getNum() > 0)
+            {
 
-                if (mapData.clearNearby()) {
-                    this.update();
-                    statusBar.update();
-                }
+                mapData.clearNearby();
 
-            } else {
+            }
+            else
+            {
                 // 剩下的都是空地，不能点击
             }
 
@@ -104,15 +106,9 @@ window.onload = function () {
         if (!mapData.IsValid(x, y))
             return;
 
-
         try {
             mapData.seek(x, y);
-
-            if (mapData.toggleFlag())
-            {
-                this.update();
-                statusBar.update();
-            }
+            mapData.toggleFlag();
         } catch (e) {
             GameException(e);
         }
@@ -165,6 +161,10 @@ window.onload = function () {
     RES.Start(GameStart);
 };
 
+const player = new Player(function () {
+    widget.update();
+    statusBar.update();
+});
 
 const GameStart = () => {
     mapData.clear();
@@ -182,14 +182,15 @@ const GameStart = () => {
     statusBar.move(30, 30 + win_height + 10);
     statusBar.resize(win_width, 50);
     statusBar.show();
+
+    // 执行动画
+    player.start();
 };
 
 const GameException = (e) => {
 
     switch (e) {
         case MINE_GAME_OVER:
-            widget.update();
-            statusBar.update();
             break;
         case MINE_INVALID_POS:
             alert('坐标超出范围');
@@ -201,4 +202,6 @@ const GameException = (e) => {
             throw e;
     }
 };
+
+
 

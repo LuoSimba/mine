@@ -22,6 +22,8 @@ TODO:
 
 changelog:
 
+0615 - 使用动画 requestAnimationFrame。使用动画会*非常*消耗性能
+
 0614 - 使用 Array.filter Array.map Array.reduce Array.forEach (ECMA 22.1.3)
        支持点击数字，翻开周围砖块
 
