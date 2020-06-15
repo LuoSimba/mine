@@ -129,6 +129,7 @@ window.onload = function () {
         painter.setFont('新宋体', 12, false);
         // Template String
         painter.drawText(10, 40, `FLAG:${flagsLeft}`);
+        painter.drawText(100, 40, `PLAYER.id:${player.id}`);
         painter.restore();
 
         // if game over
