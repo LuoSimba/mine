@@ -6,6 +6,8 @@ MineSweep of JavaScript
 
 本地运行，浏览器可能需要加上： --allow-file-access-from-files
 
+预览：[https://luosimba.github.io/mine/](https://luosimba.github.io/mine/)
+
 
 开发环境：
     chrome 83
