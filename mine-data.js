@@ -18,6 +18,13 @@ const MINE_INVALID_POS = Symbol('invalid position');
 const MINE_LOGIC_ERROR = Symbol('logic error');
 
 /**
+ * 游戏状态
+ */
+const MINEST_PENDING = Symbol('status pending');
+const MINEST_START   = Symbol('status game start');
+const MINEST_OVER    = Symbol('status game over');
+
+/**
  * usage:
  *
  * let map = new MineData(width, height);
@@ -120,7 +127,7 @@ const MineData = (function () {
         // isMine? then you are dead
         if ((data & 0b00100000) !== 0)
         {
-            this.bGameOver = true;
+            this.status = MINEST_OVER;
             throw MINE_GAME_OVER;
         }
         else if ((data & 0b00001111) === 0) // isEmpty?
@@ -167,7 +174,7 @@ const MineData = (function () {
         this.flagsCount = 0;    // 当前已用的红旗数
         this.flagsCountYes = 0; // 有效红旗数
         this.uncleanBricks = 0; // 剩余未清除砖块数量
-        this.bGameOver = true;
+        this.status = MINEST_PENDING;
 
         // 当前操作定位
         this.x = 0;
@@ -194,13 +201,13 @@ const MineData = (function () {
     /**
      * 清理战场
      *
-     * RULE: 清理战场则游戏必须重置为结束状态
+     * RULE: 清理战场则游戏必须重置为等待状态
      */
     MineSweepData.prototype.clear = function () {
         for (let i = 0; i < this.data.length; i ++)
             this.data[i] = 0;
 
-        this.bGameOver = true;
+        this.status = MINEST_PENDING;
         this.uncleanBricks = 0;
         this.mineCount = 0;
         this.flagsCount = 0;
@@ -220,7 +227,7 @@ const MineData = (function () {
             this.data[ i ] = (this.data[i] & 0b01111111) | 0b01000000;
         }
 
-        this.bGameOver = false;
+        this.status = MINEST_START;
         this.uncleanBricks = size;
         this.flagsCount = 0;
         this.flagsCountYes = 0;
@@ -234,7 +241,7 @@ const MineData = (function () {
      * whether game is over
      */
     MineSweepData.prototype.isGameOver = function () {
-        return this.bGameOver;
+        return this.status === MINEST_OVER;
     };
 
     /**
@@ -287,15 +294,14 @@ const MineData = (function () {
      *
      * max <= this.width * this.height
      *
-     * RULE: 游戏开始阶段，不能放置地雷
+     * RULE: 游戏等待阶段，才能放置地雷
      *
      * throw symbol
      */
     MineSweepData.prototype.placeMines = function (max) {
 
-        if (!this.isGameOver())
+        if (this.status !== MINEST_PENDING)
             throw MINE_LOGIC_ERROR;
-
 
         while (max > 0) {
 
@@ -357,7 +363,7 @@ const MineData = (function () {
     /**
      * 放置/移除红旗
      *
-     * RULE: 游戏结束时，不准此项操作
+     * RULE: 游戏开始时，才能此项操作
      *
      * RULE: 只有在砖块存在的情况下才能操作
      *
@@ -365,8 +371,9 @@ const MineData = (function () {
      */
     MineSweepData.prototype.toggleFlag = function () {
 
-        if (this.isGameOver())
+        if (this.status !== MINEST_START)
             return false;
+
 
         if (this.isBrick())
         {
@@ -411,7 +418,7 @@ const MineData = (function () {
     MineSweepData.prototype.checkSuccess = function () {
         if (this.flagsCountYes === this.mineCount)
         {
-            this.bGameOver = true;
+            this.status = MINEST_OVER;
             throw MINE_GAME_OVER;
         }
     };

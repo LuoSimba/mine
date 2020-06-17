@@ -31,6 +31,70 @@ let mapData = new MineData(30, 16); // define map(20, 15)
 let widget; // game window
 let statusBar;
 
+
+/**
+ * 绘制地图数据
+ */
+const RenderMapData = (painter) => {
+    for (let y = 0; y < mapData.height; y ++) {
+        for (let x = 0; x < mapData.width; x ++) {
+
+            mapData.seek(x, y);
+
+            // draw blocks.
+            if (mapData.isBrick()) {
+                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_BLOCK);
+            } else {
+                // draw ground.
+                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_GROUND);
+
+                let digit = mapData.getNum();
+                // 显示地雷
+                if (mapData.isMine())
+                {
+                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_MINE);
+                }
+                // 显示数值
+                else if (digit > 0)
+                {
+                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, NUMS[digit]);
+                }
+            }
+
+            // 绘制红旗
+            if (mapData.isFlag()) {
+                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_FLAG);
+            }
+        }
+    }
+};
+
+const RenderGameOver = (painter) => {
+
+    if (mapData.isGameOver()) {
+        painter.save();
+
+        painter.translate(widget.width() / 2, widget.height() / 2);
+        // frame
+        painter.ctx.fillStyle = 'rgba(255,255,255,.6)';
+        painter.ctx.strokeStyle = 'black';
+        painter.ctx.lineWidth = 2;
+        painter.beginPath();
+        painter.ctx.rect(-100, -50, 200, 100);
+        painter.fill();
+        painter.stroke();
+        // text
+        painter.ctx.fillStyle = 'black';
+        painter.ctx.textAlign = 'center';
+        painter.ctx.textBaseline = 'middle';
+        painter.setFont('新宋体', 30, true);
+        painter.drawText(0, 0, 'Game Over');
+        painter.restore();
+    }
+};
+
+
+
 window.onload = function () {
 
     widget = new Widget;
@@ -41,40 +105,8 @@ window.onload = function () {
      * 游戏结束的显示方式有点不一样
      */
     widget.render = function ({painter}) {
-
-        const isGameOver = mapData.isGameOver();
-
-        for (let y = 0; y < mapData.height; y ++) {
-            for (let x = 0; x < mapData.width; x ++) {
-
-                mapData.seek(x, y);
-
-                // draw blocks.
-                if (mapData.isBrick()) {
-                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_BLOCK);
-                } else {
-                    // draw ground.
-                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_GROUND);
-
-                    let digit = mapData.getNum();
-                    // 显示地雷
-                    if (mapData.isMine())
-                    {
-                        painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_MINE);
-                    }
-                    // 显示数值
-                    else if (digit > 0)
-                    {
-                        painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, NUMS[digit]);
-                    }
-                }
-
-                // 绘制红旗
-                if (mapData.isFlag()) {
-                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_FLAG);
-                }
-            }
-        }
+        RenderMapData(painter);
+        RenderGameOver(painter);
     };
 
     /**
@@ -151,16 +183,7 @@ window.onload = function () {
         painter.setFont('新宋体', 12, false);
         // Template String
         painter.drawText(10, 40, `FLAG:${flagsLeft}`);
-        painter.drawText(100, 40, `PLAYER.id:${movie.id}`);
         painter.restore();
-
-        // if game over
-        if (mapData.isGameOver()) {
-            painter.save();
-            painter.setFont('新宋体', 30, true);
-            painter.drawText(100, 40, "GAME OVER");
-            painter.restore();
-        }
     };
 
     statusBar.onclick = function (x, y) {
