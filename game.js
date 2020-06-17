@@ -3,7 +3,7 @@
 // global setting
 const BOX_SIZE = 32;
 const RES = new ResManager();
-let mapData = new MineData(20, 15); // define map(20, 15)
+let mapData = new MineData(30, 16); // define map(20, 15)
 let widget; // game window
 let statusBar;
 
@@ -129,7 +129,7 @@ window.onload = function () {
         painter.setFont('新宋体', 12, false);
         // Template String
         painter.drawText(10, 40, `FLAG:${flagsLeft}`);
-        painter.drawText(100, 40, `PLAYER.id:${player.id}`);
+        painter.drawText(100, 40, `PLAYER.id:${movie.id}`);
         painter.restore();
 
         // if game over
@@ -162,14 +162,14 @@ window.onload = function () {
     RES.Start(GameStart);
 };
 
-const player = new Player(function () {
+const movie = new Player(function () {
     widget.update();
     statusBar.update();
 });
 
 const GameStart = () => {
     mapData.clear();
-    mapData.placeMines(10);
+    mapData.placeMines(99);
     mapData.ready();
 
     const win_width  = mapData.width  * BOX_SIZE;
@@ -185,7 +185,7 @@ const GameStart = () => {
     statusBar.show();
 
     // 执行动画
-    player.start();
+    movie.start();
 };
 
 const GameException = (e) => {

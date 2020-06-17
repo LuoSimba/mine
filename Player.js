@@ -45,6 +45,8 @@ const Player = (function () {
         // 并不是在 request... 内部执行（异步？）
         //
         // return long 请求ID
+        //
+        // 请求ID不会被用完，是一个很大的数
         this.id = window.requestAnimationFrame(fn);
         this.isStart = true;
     };

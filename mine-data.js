@@ -273,10 +273,8 @@ const MineData = (function () {
                 ([x, y]) => _clear_brick.call(this, x, y)
             );
 
-            if (this.uncleanBricks === this.mineCount) {
-                this.bGameOver = true;
-                throw MINE_GAME_OVER;
-            }
+            // XXX 这里不需要检查
+            this.checkSuccess();
 
             return true;
         }
@@ -344,13 +342,8 @@ const MineData = (function () {
 
         _clear_brick.call(this, this.x, this.y);
 
-        // 检查是否完成任务
-        // 如果剩余砖块数，等于地雷数，那么地雷一定就在
-        // 这些砖块下
-        if (this.uncleanBricks === this.mineCount) {
-            this.bGameOver = true;
-            throw MINE_GAME_OVER;
-        }
+        // XXX 这里不需要检查
+        this.checkSuccess();
     };
 
     /**
@@ -397,14 +390,7 @@ const MineData = (function () {
                 if (this.isMine()) {
                     this.flagsCountYes ++;
 
-                    // 检查是否完成任务
-                    // 不用在意砖块是否都已翻开
-                    // 只要红旗指出了所有的地雷位置就算胜利
-                    if (this.flagsCountYes === this.mineCount)
-                    {
-                        this.bGameOver = true;
-                        throw MINE_GAME_OVER;
-                    }
+                    this.checkSuccess(); // throw
                 }
 
                 return true; // changed successfully
@@ -412,6 +398,22 @@ const MineData = (function () {
         }
 
         return false; // do nothing
+    };
+
+    /**
+     * 检查是否完成任务
+     *
+     * 不用在意砖块是否都已翻开
+     * 只要红旗指出了所有的地雷位置就算胜利
+     *
+     * throw
+     */
+    MineSweepData.prototype.checkSuccess = function () {
+        if (this.flagsCountYes === this.mineCount)
+        {
+            this.bGameOver = true;
+            throw MINE_GAME_OVER;
+        }
     };
 
     /**

@@ -6,6 +6,8 @@ MineSweep of JavaScript
 
 本地运行，浏览器可能需要加上： --allow-file-access-from-files
 
+**仅支持PC端，使用鼠标操作**
+
 预览：[https://luosimba.github.io/mine/](https://luosimba.github.io/mine/)
 
 
@@ -24,7 +26,7 @@ TODO:
 
 changelog:
 
-0615 - 使用动画 requestAnimationFrame。使用动画会*非常*消耗性能
+0615 - 使用动画 requestAnimationFrame。使用动画会**非常**消耗性能
 
 0614 - 使用 Array.filter Array.map Array.reduce Array.forEach (ECMA 22.1.3)
        支持点击数字，翻开周围砖块
