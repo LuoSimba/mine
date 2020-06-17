@@ -3,6 +3,30 @@
 // global setting
 const BOX_SIZE = 32;
 const RES = new ResManager();
+const IMG_BLOCK  = RES.LoadImage('block.png');
+const IMG_GROUND = RES.LoadImage('ground.png');
+const IMG_FLAG   = RES.LoadImage('flag.png');
+const IMG_MINE   = RES.LoadImage('mine.png');
+const IMG_DIGIT_1 = RES.LoadImage('num_1.png');
+const IMG_DIGIT_2 = RES.LoadImage('num_2.png');
+const IMG_DIGIT_3 = RES.LoadImage('num_3.png');
+const IMG_DIGIT_4 = RES.LoadImage('num_4.png');
+const IMG_DIGIT_5 = RES.LoadImage('num_5.png');
+const IMG_DIGIT_6 = RES.LoadImage('num_6.png');
+const IMG_DIGIT_7 = RES.LoadImage('num_7.png');
+const IMG_DIGIT_8 = RES.LoadImage('num_8.png');
+const NUMS = [
+    null,
+    IMG_DIGIT_1,
+    IMG_DIGIT_2,
+    IMG_DIGIT_3,
+    IMG_DIGIT_4,
+    IMG_DIGIT_5,
+    IMG_DIGIT_6,
+    IMG_DIGIT_7,
+    IMG_DIGIT_8,
+];
+
 let mapData = new MineData(30, 16); // define map(20, 15)
 let widget; // game window
 let statusBar;
@@ -27,27 +51,27 @@ window.onload = function () {
 
                 // draw blocks.
                 if (mapData.isBrick()) {
-                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('block'));
+                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_BLOCK);
                 } else {
                     // draw ground.
-                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('ground'));
+                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_GROUND);
 
                     let digit = mapData.getNum();
                     // 显示地雷
                     if (mapData.isMine())
                     {
-                        painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('mine'));
+                        painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_MINE);
                     }
                     // 显示数值
                     else if (digit > 0)
                     {
-                        painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('num_' + digit));
+                        painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, NUMS[digit]);
                     }
                 }
 
                 // 绘制红旗
                 if (mapData.isFlag()) {
-                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.Get('flag'));
+                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_FLAG);
                 }
             }
         }
@@ -145,21 +169,7 @@ window.onload = function () {
         GameStart();
     });
 
-    RES.DimPic('block',  'block.png');
-    RES.DimPic('ground', 'ground.png');
-    RES.DimPic('flag',   'flag.png');
-    RES.DimPic('mine',   'mine.png');
-    // --
-    RES.DimPic('num_1',   'num_1.png');
-    RES.DimPic('num_2',   'num_2.png');
-    RES.DimPic('num_3',   'num_3.png');
-    RES.DimPic('num_4',   'num_4.png');
-    RES.DimPic('num_5',   'num_5.png');
-    RES.DimPic('num_6',   'num_6.png');
-    RES.DimPic('num_7',   'num_7.png');
-    RES.DimPic('num_8',   'num_8.png');
-
-    RES.Start(GameStart);
+    RES.then(GameStart);
 };
 
 const movie = new Player(function () {
