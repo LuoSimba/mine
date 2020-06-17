@@ -12,11 +12,10 @@ const Painter = function (device) {
 
     // 相当于取得画布的画笔，画笔只有一支
 
-    // fill
     this.ctx.fillStyle = '#000000';
 
     // line
-    this.ctx.lineWidth = 1;  // 线条粗细
+    this.ctx.lineWidth = 1;  // 线条粗细(不能为0)
     // miter 尖角
     // bevel 斜角
     // round 圆角
@@ -30,6 +29,7 @@ const Painter = function (device) {
     // text
     this.ctx.textBaseline = 'top';
     this.ctx.textAlign    = 'start';
+
 };
 
 /**
@@ -42,6 +42,8 @@ Painter.prototype.clearRect = function (x, y, w, h) {
 
 /**
  * 在画布上贴图
+ *
+ * img 可以是另一个<canvas>
  */
 Painter.prototype.drawImage = function (x, y, img) {
     this.ctx.drawImage(img, x, y);
@@ -73,5 +75,22 @@ Painter.prototype.save = function () {
 
 Painter.prototype.restore = function () {
     this.ctx.restore();
+};
+
+Painter.prototype.beginPath = function () {
+    this.ctx.beginPath();
+};
+
+Painter.prototype.stroke = function () {
+    this.ctx.stroke();
+};
+
+Painter.prototype.fill = function () {
+    this.ctx.fill();
+};
+
+Painter.prototype.circle = function (x, y, radius) {
+    // (x, y, radius, startAngle, endAngle)
+    this.ctx.arc(x, y, radius, 0, Math.PI * 2);
 };
 
