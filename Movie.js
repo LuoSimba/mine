@@ -1,9 +1,9 @@
 /*!
  * 对动画管理的简单封装
  */
-const Player = (function () {
+const Movie = (function () {
 
-    const Player = function (callback) {
+    const Movie = function (callback) {
 
         this.callback = callback;
         this.id = null;
@@ -13,7 +13,7 @@ const Player = (function () {
     /**
      * 停止动画
      */
-    Player.prototype.stop = function () {
+    Movie.prototype.stop = function () {
         if (this.isStart) {
             window.cancelAnimationFrame(this.id);
             this.isStart = false;
@@ -23,7 +23,7 @@ const Player = (function () {
     /**
      * 开始动画
      */
-    Player.prototype.start = function () {
+    Movie.prototype.start = function () {
         if (this.isStart)
             return;
 
@@ -51,6 +51,6 @@ const Player = (function () {
         this.isStart = true;
     };
 
-    return Player;
+    return Movie;
 })();
 

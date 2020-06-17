@@ -18,10 +18,40 @@ const Widget = (function () {
 
         this.painter = new Painter(this.device);
 
+        /**
+         * 这里使用 ArrowFunction,
+         * 当这个函数被 onclick 调用时，
+         * this 不再是 this.device
+         * (this.device 在调用 onclick)
+         *
+         * this 会是 ArrowFunction 定义时的 this 值
+         * 这里是 Widget 对象
+         */
+        this.device.onclick = (event) => {
+            // layerX  NO
+            // pageX   NO
+            // offsetX YES
+            if (this.onclick !== null)
+                this.onclick(event.offsetX, event.offsetY);
+        };
+
+        // 单击右键
+        this.device.oncontextmenu = (event) => {
+
+            if (this.oncontextmenu !== null) {
+                this.oncontextmenu(event.offsetX, event.offsetY);
+                return false;
+            }
+        };
+
         document.body.append(this.device);
 
         this.render = null;
         this.visible = false;
+
+        // interface
+        this.onclick = null;
+        this.oncontextmenu = null;
 	};
 
     /**
@@ -87,44 +117,6 @@ const Widget = (function () {
             this.painter.restore();
         }
     };
-
-    /**
-     * click event
-     */
-    // 单击左键
-    Widget.prototype.onClick = function (fn) {
-
-        /**
-         * 这里使用 ArrowFunction,
-         * 当这个函数被 onclick 调用时，
-         * this 不再是 this.device
-         * (this.device 在调用 onclick)
-         *
-         * this 会是 ArrowFunction 定义时的 this 值
-         * 这里是 Widget 对象
-         */
-        this.device.onclick = (event) => {
-
-            // layerX  NO
-            // pageX   NO
-            // offsetX YES
-
-            fn.call(this, event.offsetX, event.offsetY);
-        };
-    };
-
-    // 单击右键
-    Widget.prototype.onContextMenu = function (fn) {
-
-        this.device.oncontextmenu = (event) => {
-            console.log('[context-menu]');
-
-            fn.call(this, event.offsetX, event.offsetY);
-
-            return false;
-        };
-    };
-
 
 	return Widget;
 })();

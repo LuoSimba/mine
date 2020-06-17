@@ -80,7 +80,7 @@ window.onload = function () {
     /**
      * 翻开砖块
      */
-    widget.onClick(function (x, y) {
+    widget.onclick = function (x, y) {
 
         if (mapData.isGameOver())
             return;
@@ -102,9 +102,7 @@ window.onload = function () {
             }
             else if (mapData.getNum() > 0)
             {
-
                 mapData.clearNearby();
-
             }
             else
             {
@@ -114,12 +112,12 @@ window.onload = function () {
         } catch (e) {
             GameException(e);
         }
-    });
+    };
 
     /**
      * 放置旗帜
      */
-    widget.onContextMenu(function (x, y) {
+    widget.oncontextmenu = function (x, y) {
 
         if (mapData.isGameOver())
             return;
@@ -136,7 +134,7 @@ window.onload = function () {
         } catch (e) {
             GameException(e);
         }
-    });
+    };
 
 
     // --
@@ -165,14 +163,14 @@ window.onload = function () {
         }
     };
 
-    statusBar.onClick(function (x, y) {
+    statusBar.onclick = function (x, y) {
         GameStart();
-    });
+    };
 
     RES.then(GameStart);
 };
 
-const movie = new Player(function () {
+const movie = new Movie(function () {
     widget.update();
     statusBar.update();
 });

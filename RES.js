@@ -1,7 +1,9 @@
 "use strict";
 
-// 图片加载管理器
-var ResManager = function () {
+/**
+ * 图片加载管理器
+ */
+const ResManager = function () {
 	this.loadingCount = 0;
 
     this.fn = null;
