@@ -46,30 +46,29 @@ const RenderMapData = (painter) => {
     for (let y = 0; y < mapData.height; y ++) {
         for (let x = 0; x < mapData.width; x ++) {
 
-            mapData.seek(x, y);
+            const block = mapData.seek(x, y);
 
             // draw blocks.
-            if (mapData.isBrick()) {
+            if (block.isBrick) {
                 painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_BLOCK);
             } else {
                 // draw ground.
                 painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_GROUND);
 
-                let digit = mapData.getNum();
                 // 显示地雷
                 if (mapData.isMine())
                 {
                     painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_MINE);
                 }
                 // 显示数值
-                else if (digit > 0)
+                else if (block.num > 0)
                 {
-                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, NUMS[digit]);
+                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, NUMS[block.num]);
                 }
             }
 
             // 绘制红旗
-            if (mapData.isFlag()) {
+            if (block.isFlag) {
                 painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_FLAG);
             }
         }
@@ -143,20 +142,20 @@ window.onload = function () {
         hot.alive = 20;
 
         try {
-            mapData.seek(x, y);
+            const block = mapData.seek(x, y);
 
-            if (mapData.isFlag())
+            if (block.isFlag)
             {
                 // do nothing, 红旗不可操作
             }
-            else if (mapData.isBrick())
+            else if (block.isBrick)
             {
                 // 打开砖块
-                mapData.clearBrick();
+                mapData.clearBrick(x, y);
             }
-            else if (mapData.getNum() > 0)
+            else if (block.num > 0)
             {
-                mapData.clearNearby();
+                mapData.clearNearby(x, y);
             }
             else
             {
@@ -183,8 +182,7 @@ window.onload = function () {
             return;
 
         try {
-            mapData.seek(x, y);
-            mapData.toggleFlag();
+            mapData.toggleFlag(x, y);
         } catch (e) {
             GameException(e);
         }
@@ -223,7 +221,7 @@ const movie = new Movie(function () {
 
 const GameStart = () => {
     mapData.clear();
-    mapData.placeMines(99);
+    mapData.placeMines(10);
     mapData.ready();
 
     const win_width  = mapData.width  * BOX_SIZE;

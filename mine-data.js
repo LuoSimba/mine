@@ -1,4 +1,3 @@
-"use strict";
 
 
 /**
@@ -23,6 +22,76 @@ const MINE_LOGIC_ERROR = Symbol('logic error');
 const MINEST_PENDING = Symbol('status pending');
 const MINEST_START   = Symbol('status game start');
 const MINEST_OVER    = Symbol('status game over');
+
+
+
+const MineBlock = class {
+    _is_flag  = false;
+    _is_brick = false;
+    _is_mine = false;
+    _num = 0;
+
+    constructor () {
+        this.isMine = false;
+        this._num = 0;
+
+        this.clearFlag();
+        this.clearBrick();
+    }
+
+    get isMine () {
+        return this._is_mine;
+    }
+
+    set isMine (b) {
+        this._is_mine = b;
+    }
+
+    /**
+     * 获取当前位置的数值
+     *
+     * RULE: 地雷本身所在的地方，永远返回0
+     */
+    get num () {
+        if (this.isMine)
+            return 0;
+
+        return this._num;
+    }
+
+    numInc () {
+        this._num ++;
+    }
+
+    // 是否为砖块
+    get isBrick () {
+        return this._is_brick;
+    }
+
+    coverBrick () {
+        this._is_brick = true;
+    }
+
+    clearBrick () {
+        this._is_brick = false;
+    }
+
+    // 是否标记为红旗
+    get isFlag () {
+        return this._is_flag;
+    }
+
+    clearFlag () {
+        this._is_flag = false;
+    }
+
+    setFlag () {
+        this._is_flag = true;
+    }
+};
+
+
+
 
 /**
  * usage:
@@ -59,12 +128,13 @@ const MineData = (function () {
             {
                 // isMine?
                 // 本身是地雷也可以放置数值标记，
-                // 但是调用 getNum() 返回为 0 以同其他数值区域相区别
+                // 但是调用 num 返回为 0 以同其他数值区域相区别
                 //
                 //let n = this.data[ this.width * y + x ] & 0b00001111;
 
                 // 标记周围的地雷数量 ++
-                this.data[ this.width * y + x ] ++; // FIXME
+                const block = this.data[ this.width * y + x ];
+                block.numInc();
 			}
 		}
 	}
@@ -79,18 +149,21 @@ const MineData = (function () {
 
         const addr = this.width * y + x;
 
-        if ((this.data[addr] & 0b00100000) === 0)
+        const block = this.data[addr];
+
+        if (block.isMine)
         {
-            this.data[ addr ] |= 0b00100000;
+            return false;
+        } 
+        else 
+        {
+            block.isMine = true;
 
             this.mineCount ++;
 
             _num_surround.call(this, x, y);
-
             return true;
         }
-        else 
-            return false;
     }
 
 
@@ -108,29 +181,25 @@ const MineData = (function () {
         if (!this.IsValid(x, y))
             return;
 
-        let data = this.data[ this.width * y + x ];
+        const block = this.data[ this.width * y + x ];
 
-        // isFlag
-        if ((data & 0b10000000) !== 0)
+        if (block.isFlag)
             return;
 
-        // isClean
-        if ((data & 0b01000000) === 0)
+        if (!block.isBrick)
             return;
 
-        // clear brick
-        data &= 0b10111111;
-        this.data[ this.width * y + x ] = data;
+        block.clearBrick();
         this.uncleanBricks --;
 
         // see what's under the brick
         // isMine? then you are dead
-        if ((data & 0b00100000) !== 0)
+        if (block.isMine)
         {
-            this.status = MINEST_OVER;
+            this._status = MINEST_OVER;
             throw MINE_GAME_OVER;
         }
-        else if ((data & 0b00001111) === 0) // isEmpty?
+        else if (block.num === 0) // isEmpty?
         {
             _clear_brick.call(this, x-1, y  );
             _clear_brick.call(this, x-1, y-1);
@@ -164,85 +233,106 @@ const MineData = (function () {
         return list2;
     }
 
-	const MineSweepData = function (wid, hgt) {
 
-        this.width  = wid;
-        this.height = hgt;
-        this.data   = new Uint8Array(this.width * this.height); // ArrayBuffer
+const MineSweepData = class {
 
-        this.mineCount = 0;     // 当前存在的地雷数
-        this.flagsCount = 0;    // 当前已用的红旗数
-        this.flagsCountYes = 0; // 有效红旗数
-        this.uncleanBricks = 0; // 剩余未清除砖块数量
-        this.status = MINEST_PENDING;
+    _wid = 0;
+    _hgt = 0;
+    // 当前操作定位
+    _x = 0;
+    _y = 0;
+    _addr = 0;
+    // state
+    mineCount = 0;     // 当前存在的地雷数
+    flagsCount = 0;    // 当前已用的红旗数
+    flagsCountYes = 0; // 有效红旗数
+    uncleanBricks = 0; // 剩余未清除砖块数量
+    _status = MINEST_PENDING;
 
-        // 当前操作定位
-        this.x = 0;
-        this.y = 0;
-        this.addr = 0;
-	};
+    constructor (wid, hgt) {
+
+        this._wid = wid;
+        this._hgt = hgt;
+        this.clear();
+    }
+
+    get width () {
+        return this._wid;
+    }
+
+    get height () {
+        return this._hgt;
+    }
 
     /**
-     * 设置当前定位
+     * get MineBlock of 当前定位
      *
-     * throw symbol
+     * return MineBlock, throw symbol
      */
-    MineSweepData.prototype.seek = function (x, y) {
+    seek (x, y) {
 
-        if (this.IsValid(x, y)) {
-            this.x = x;
-            this.y = y;
-            this.addr = this.width * this.y + this.x;
-        }
-        else 
+        if (!this.IsValid(x, y))
             throw MINE_INVALID_POS;
-    };
+
+        const addr = this.width * y + x;
+
+        return this.data[ addr ];
+    }
 
     /**
      * 清理战场
      *
      * RULE: 清理战场则游戏必须重置为等待状态
      */
-    MineSweepData.prototype.clear = function () {
-        for (let i = 0; i < this.data.length; i ++)
-            this.data[i] = 0;
+    clear () {
 
-        this.status = MINEST_PENDING;
+        // 不再使用 Uint8Array(w, h), ArrayBuffer 作为数据存储
+        this.data = [];
+
+        for (let j = 0; j < this.height; j ++)
+            for (let i = 0; i < this.width; i ++)
+                this.data.push(new MineBlock);
+
+        this._status = MINEST_PENDING;
         this.uncleanBricks = 0;
         this.mineCount = 0;
         this.flagsCount = 0;
         this.flagsCountYes = 0;
-    };
+    }
 
     /**
      * 准备开始游戏
      *
      * 全部覆盖砖块
      */
-    MineSweepData.prototype.ready = function () {
+    ready () {
         const size = this.width * this.height;
 
         for (let i = 0; i < size; i ++) {
+
+            let block = this.data[ i ];
+
             // remove all flags & cover with bricks
-            this.data[ i ] = (this.data[i] & 0b01111111) | 0b01000000;
+            block.clearFlag();
+            block.coverBrick();
         }
 
-        this.status = MINEST_START;
+        this._status = MINEST_START;
         this.uncleanBricks = size;
         this.flagsCount = 0;
         this.flagsCountYes = 0;
 
-        this.x = 0;
-        this.y = 0;
-        this.addr = 0;
-    };
+        this._x = 0;
+        this._y = 0;
+        this._addr = 0;
+    }
 
     /**
      * whether game is over
      */
-    MineSweepData.prototype.isGameOver = function () {
-        return this.status === MINEST_OVER;
-    };
+    isGameOver () {
+        return this._status === MINEST_OVER;
+    }
 
     /**
      * 清理周围的砖块
@@ -251,20 +341,18 @@ const MineData = (function () {
      *
      * RULE: 只有周围红旗数和当前数值对应才会进行
      */
-    MineSweepData.prototype.clearNearby = function () {
-        // 当前位置的数值
-        const n2 = mapData.getNum();
+    clearNearby (x, y) {
 
-        if (n2 <= 0)
+        const block = this.data[ this.width * y + x ];
+
+        if (block.num <= 0)
             throw MINE_LOGIC_ERROR;
 
-        const nearby = _nearby_positions.call(this, this.x, this.y);
+        const nearby = _nearby_positions.call(this, x, y);
 
-        // isFlag
         const list = nearby.map(
             ([x, y]) => {
-                return (this.data[ this.width * y + x ] & 0b10000000) === 0 ? 
-                    0 : 1
+                return (this.data[ this.width * y + x ].isFlag) ? 1 : 0
             }
         );
 
@@ -274,7 +362,7 @@ const MineData = (function () {
         );
 
         // 红旗数和当前数值不一致
-        if (n2 === n)
+        if (block.num === n)
         {
             nearby.forEach(
                 ([x, y]) => _clear_brick.call(this, x, y)
@@ -282,12 +370,8 @@ const MineData = (function () {
 
             // XXX 这里不需要检查
             this.checkSuccess();
-
-            return true;
         }
-        else
-            return false;
-    };
+    }
 
     /**
      * 随机放置地雷
@@ -298,9 +382,9 @@ const MineData = (function () {
      *
      * throw symbol
      */
-    MineSweepData.prototype.placeMines = function (max) {
+    placeMines (max) {
 
-        if (this.status !== MINEST_PENDING)
+        if (this._status !== MINEST_PENDING)
             throw MINE_LOGIC_ERROR;
 
         while (max > 0) {
@@ -313,18 +397,16 @@ const MineData = (function () {
                 max --;
             }
         }
-    };
+    }
 
     /**
      * is address valid?
      */
-	MineSweepData.prototype.IsValid = function (x, y) {
+	IsValid (x, y) {
 		return (x >= 0 && x < this.width) && (y >= 0 && y < this.height);
-	};
+	}
 
     /**
-     * (自动检查坐标)
-     *
      * 如果标记为红旗，则报错
      * 如果已经被打开，则报错
      *
@@ -334,78 +416,57 @@ const MineData = (function () {
      *
      * return boolean, throw symbol
      */
-    MineSweepData.prototype.clearBrick = function () {
+    clearBrick (x, y) {
 
-        const data = this.data[ this.addr ];
+        const block = this.data[ this.width * y + x ];
 
-        // isFlag?
-        if ((data & 0b10000000) !== 0)
+        if (block.isFlag)
             throw MINE_LOGIC_ERROR;
 
-        // isClean?
-        if ((data & 0b01000000) === 0)
+        if (!block.isBrick)
             throw MINE_LOGIC_ERROR;
 
-        _clear_brick.call(this, this.x, this.y);
+        _clear_brick.call(this, x, y);
 
         // XXX 这里不需要检查
         this.checkSuccess();
-    };
-
-    /**
-     * 当前位置是否为砖块
-     *
-     */
-    MineSweepData.prototype.isBrick = function () {
-        return (this.data[ this.addr ] & 0b01000000) !== 0;
-    };
+    }
 
     /**
      * 放置/移除红旗
-     *
-     * RULE: 游戏开始时，才能此项操作
      *
      * RULE: 只有在砖块存在的情况下才能操作
      *
      * return boolean
      */
-    MineSweepData.prototype.toggleFlag = function () {
+    toggleFlag (x, y) {
 
-        if (this.status !== MINEST_START)
-            return false;
+        const block = this.data[ this.width * y + x ];
 
+        if (!block.isBrick)
+            return;
 
-        if (this.isBrick())
+        if (block.isFlag) 
         {
-            if (this.isFlag())
-            {
-                this.data[ this.addr ] &= 0b01111111; // clear flag
-                this.flagsCount --;
+            block.clearFlag();
+            this.flagsCount --;
 
-                if (this.isMine())
-                    this.flagsCountYes --;
+            if (block.isMine)
+                this.flagsCountYes --;
+        }
+        // 红旗数量是有限资源，不能超过地雷数量
+        else if (this.flagsCount < this.mineCount)
+        {
+            block.setFlag();
+            this.flagsCount ++;
 
-                return true;
-            }
-            // 红旗数量是有限资源，不能超过地雷数量
-            else if (this.flagsCount < this.mineCount)
-            {
-                this.data[ this.addr ] |= 0b10000000; // set flag
-                this.flagsCount ++;
+            if (block.isMine) {
+                this.flagsCountYes ++;
 
-
-                if (this.isMine()) {
-                    this.flagsCountYes ++;
-
-                    this.checkSuccess(); // throw
-                }
-
-                return true; // changed successfully
+                this.checkSuccess(); // throw
             }
         }
-
-        return false; // do nothing
-    };
+    }
 
     /**
      * 检查是否完成任务
@@ -415,42 +476,23 @@ const MineData = (function () {
      *
      * throw
      */
-    MineSweepData.prototype.checkSuccess = function () {
+    checkSuccess () {
         if (this.flagsCountYes === this.mineCount)
         {
-            this.status = MINEST_OVER;
+            this._status = MINEST_OVER;
             throw MINE_GAME_OVER;
         }
-    };
-
-    /**
-     * 当前位置是否标记为红旗
-     */
-    MineSweepData.prototype.isFlag = function () {
-        return (this.data[ this.addr ] & 0b10000000) !== 0;
-    };
+    }
 
     /**
      * 当前位置是否是地雷
      */
-    MineSweepData.prototype.isMine = function () {
-        return (this.data[ this.addr ] & 0b00100000) !== 0;
-    };
+    isMine () {
+        return (this.data[ this._addr ] & 0b00100000) !== 0;
+    }
 
-    /**
-     * 获取当前位置的数值
-     *
-     * RULE: 地雷本身所在的地方，永远返回0
-     */
-    MineSweepData.prototype.getNum = function () {
+};
 
-        if (this.isMine())
-            return 0;
-
-        let n = this.data[ this.addr ] & 0b00001111;
-
-        return n;
-    };
 
 	return MineSweepData;
 })();
