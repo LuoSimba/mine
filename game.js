@@ -31,6 +31,13 @@ let mapData = new MineData(30, 16); // define map(20, 15)
 let widget; // game window
 let statusBar;
 
+// XXX: test
+const hot = {
+    alive: 0,
+    x: 0,
+    y: 0,
+};
+
 
 /**
  * 绘制地图数据
@@ -67,6 +74,17 @@ const RenderMapData = (painter) => {
             }
         }
     }
+
+    if (hot.alive > 0) {
+        hot.alive --;
+        painter.save();
+        painter.beginPath();
+        painter.ctx.rect(
+            BOX_SIZE * (hot.x-1), BOX_SIZE * (hot.y-1),
+            BOX_SIZE * 3, BOX_SIZE * 3);
+        painter.stroke();
+        painter.restore();
+    }
 };
 
 const RenderGameOver = (painter) => {
@@ -74,7 +92,7 @@ const RenderGameOver = (painter) => {
     if (mapData.isGameOver()) {
         painter.save();
 
-        painter.translate(widget.width() / 2, widget.height() / 2);
+        painter.translate(widget.width / 2, widget.height / 2);
         // frame
         painter.ctx.fillStyle = 'rgba(255,255,255,.6)';
         painter.ctx.strokeStyle = 'black';
@@ -119,6 +137,10 @@ window.onload = function () {
 
         x = Math.floor(x / BOX_SIZE);
         y = Math.floor(y / BOX_SIZE);
+
+        hot.x = x;
+        hot.y = y;
+        hot.alive = 20;
 
         try {
             mapData.seek(x, y);
@@ -177,12 +199,13 @@ window.onload = function () {
         // 剩余可用红旗数
         const flagsLeft = mapData.mineCount - mapData.flagsCount;
 
-        painter.clearRect(0, 0, this.width(), this.height());
+        painter.clearRect(0, 0, this.width, this.height);
 
         painter.save();
         painter.setFont('新宋体', 12, false);
         // Template String
         painter.drawText(10, 40, `FLAG:${flagsLeft}`);
+        painter.drawText(100, 40, `HOT:${hot.alive}`);
         painter.restore();
     };
 

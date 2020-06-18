@@ -6,8 +6,6 @@ MineSweep of JavaScript
 
 本地运行，浏览器可能需要加上： --allow-file-access-from-files
 
-**仅支持PC端，使用鼠标操作**
-
 预览：[https://luosimba.github.io/mine/](https://luosimba.github.io/mine/)
 
 
@@ -16,18 +14,13 @@ MineSweep of JavaScript
     win 10
 
 
-TODO:
-
-* 标记为 "?"
-* 结果没有明确显示输赢
-* 没有时间计算
-* for ... of ...
 
 
 
-changelog:
+## changelog
 
 0618 - 游戏增加为三个阶段：准备，开始，结束
+       使用 class 来定义类
 
 0615 - 使用动画 requestAnimationFrame。使用动画会**非常**消耗性能
 
@@ -48,9 +41,15 @@ changelog:
 
 
 
-因为动画很耗电
-因为扫雷要用鼠标操作
-这只是一个演示作品
+## 仅支持PC端，使用鼠标操作
+* 动画很耗电
+* 扫雷要用鼠标操作
 
 
+## TODO
+
+* 标记为 "?"
+* 结果没有明确显示输赢
+* 没有时间计算
+* for ... of ...
 

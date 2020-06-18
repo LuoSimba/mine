@@ -4,7 +4,14 @@
  *
  * 窗口默认没有边框，有利于坐标计算
  */
+// ECMA 14.6 Class Definitions
 const Widget = class {
+    // interface
+    onclick = null;
+    oncontextmenu = null;
+    render = null;
+    visible = false;
+
 	constructor () {
 
 		// 创建窗口
@@ -41,13 +48,6 @@ const Widget = class {
         };
 
         document.body.append(this.device);
-
-        this.render = null;
-        this.visible = false;
-
-        // interface
-        this.onclick = null;
-        this.oncontextmenu = null;
 	}
 
     /**
@@ -92,14 +92,14 @@ const Widget = class {
     /**
      * get client width
      */
-    width () {
+    get width () {
         return this.device.width;
     }
 
     /**
      * get client height
      */
-    height () {
+    get height () {
         return this.device.height;
     }
 
