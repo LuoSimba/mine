@@ -1,15 +1,11 @@
-"use strict";
 
-
-const Widget = (function () {
-
-
-    /**
-     * 窗口类
-     *
-     * 窗口默认没有边框，有利于坐标计算
-     */
-	const Widget = function () {
+/**
+ * 窗口类
+ *
+ * 窗口默认没有边框，有利于坐标计算
+ */
+const Widget = class {
+	constructor () {
 
 		// 创建窗口
         // 创建画布(窗口本身就是画布)
@@ -52,72 +48,70 @@ const Widget = (function () {
         // interface
         this.onclick = null;
         this.oncontextmenu = null;
-	};
+	}
 
     /**
      * show window
      */
-    Widget.prototype.show = function () {
+    show () {
         if (!this.visible) {
             this.device.style.display = 'block';
             this.visible = true;
             this.update();
         }
-    };
+    }
 
     /**
      * hide window
      */
-    Widget.prototype.hide = function () {
+    hide () {
         if (this.visible) {
             this.device.style.display = 'none';
             this.visible = false;
         }
-    };
+    }
 
     /**
      * resize window
      */
-    Widget.prototype.resize = function (wid, hgt) {
+    resize (wid, hgt) {
         this.device.width  = wid;
         this.device.height = hgt;
 
         this.update();
-    };
+    }
 
     /**
      * change window location
      */
-    Widget.prototype.move = function (x, y) {
+    move (x, y) {
         this.device.style.left = x + 'px';
         this.device.style.top  = y + 'px';
-    };
+    }
 
     /**
      * get client width
      */
-    Widget.prototype.width = function () {
+    width () {
         return this.device.width;
-    };
+    }
 
     /**
      * get client height
      */
-    Widget.prototype.height = function () {
+    height () {
         return this.device.height;
-    };
+    }
 
     /**
      * redraw window
      */
-    Widget.prototype.update = function () {
+    update () {
         if (this.visible && this.render !== null) {
             this.painter.save();
             this.render(this);
             this.painter.restore();
         }
-    };
-
-	return Widget;
-})();
+    }
+};
 
