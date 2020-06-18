@@ -201,14 +201,23 @@ const MineData = (function () {
         }
         else if (block.num === 0) // isEmpty?
         {
-            _clear_brick.call(this, x-1, y  );
-            _clear_brick.call(this, x-1, y-1);
-            _clear_brick.call(this, x,   y-1);
-            _clear_brick.call(this, x+1, y-1);
-            _clear_brick.call(this, x+1, y  );
-            _clear_brick.call(this, x+1, y+1);
-            _clear_brick.call(this, x,   y+1);
-            _clear_brick.call(this, x-1, y+1);
+            const fn2 = () => {
+                _clear_brick.call(this, x-1, y-1);
+                _clear_brick.call(this, x+1, y-1);
+                _clear_brick.call(this, x+1, y+1);
+                _clear_brick.call(this, x-1, y+1);
+            };
+
+            const fn = () => {
+                _clear_brick.call(this, x-1, y  );
+                _clear_brick.call(this, x,   y-1);
+                _clear_brick.call(this, x+1, y  );
+                _clear_brick.call(this, x,   y+1);
+
+                window.requestAnimationFrame(fn2);
+            };
+
+            window.requestAnimationFrame(fn);
         }
     }
 
