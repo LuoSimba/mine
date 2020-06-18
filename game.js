@@ -56,7 +56,7 @@ const RenderMapData = (painter) => {
                 painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_GROUND);
 
                 // 显示地雷
-                if (mapData.isMine())
+                if (block.isMine)
                 {
                     painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_MINE);
                 }

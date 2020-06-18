@@ -238,10 +238,6 @@ const MineSweepData = class {
 
     _wid = 0;
     _hgt = 0;
-    // 当前操作定位
-    _x = 0;
-    _y = 0;
-    _addr = 0;
     // state
     mineCount = 0;     // 当前存在的地雷数
     flagsCount = 0;    // 当前已用的红旗数
@@ -321,10 +317,6 @@ const MineSweepData = class {
         this.uncleanBricks = size;
         this.flagsCount = 0;
         this.flagsCountYes = 0;
-
-        this._x = 0;
-        this._y = 0;
-        this._addr = 0;
     }
 
     /**
@@ -482,13 +474,6 @@ const MineSweepData = class {
             this._status = MINEST_OVER;
             throw MINE_GAME_OVER;
         }
-    }
-
-    /**
-     * 当前位置是否是地雷
-     */
-    isMine () {
-        return (this.data[ this._addr ] & 0b00100000) !== 0;
     }
 
 };
