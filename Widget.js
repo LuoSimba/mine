@@ -11,6 +11,7 @@ const Widget = class {
     oncontextmenu = null;
     render = null;
     visible = false;
+    _is_append = false;
 
 	constructor () {
 
@@ -46,14 +47,18 @@ const Widget = class {
                 return false;
             }
         };
-
-        document.body.append(this.device);
 	}
 
     /**
      * show window
      */
     show () {
+
+        if (!this._is_append) {
+            document.body.appendChild(this.device);
+            this._is_append = true;
+        }
+
         if (!this.visible) {
             this.device.style.display = 'block';
             this.visible = true;
