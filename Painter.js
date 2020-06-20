@@ -77,6 +77,7 @@ Painter.prototype.restore = function () {
     this.ctx.restore();
 };
 
+// closePath
 Painter.prototype.beginPath = function () {
     this.ctx.beginPath();
 };
