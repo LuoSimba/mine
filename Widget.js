@@ -108,6 +108,10 @@ const Widget = class {
         return this.device.height;
     }
 
+    get ctx () {
+        return this.device.getContext('2d');
+    }
+
     /**
      * redraw window
      */
