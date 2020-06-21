@@ -123,33 +123,6 @@ const MineData = (function () {
 	}
 
 
-
-    /**
-     * return boolean
-     */
-    // 避免重复放置
-    function _set_mine(x, y) {
-
-        const addr = this.width * y + x;
-
-        const block = this.data[addr];
-
-        if (block.isMine)
-        {
-            return false;
-        } 
-        else 
-        {
-            block.isMine = true;
-
-            this.mineCount ++;
-
-            _num_surround.call(this, x, y);
-            return true;
-        }
-    }
-
-
     /**
      * 清除砖块
      *
@@ -343,6 +316,23 @@ const MineSweepData = class {
      *
      * RULE: 游戏等待阶段，才能放置地雷
      *
+     *
+     * 布雷策略：
+     *  a. 设定本次放置地雷目标数量 max
+     *  b. 设定已放置地雷数量 count = 0
+     *  c. 当 count >= max, 执行f
+     *  d. 随机选择一个坐标
+     *   d.1 如果该坐标没有放置地雷，则在此处放置地雷，count ++
+     *  e. 执行c
+     *  f. 结束
+     *
+     * 假设地图尺寸为 100x100 = 10000,
+     * 则放置 max 个地雷需要循环的次数为：
+     *  sum(10000/(10000-i)), i in [0, max)
+     *
+     * 假设放置 9999 个地雷，需要循环执行约为 88K 次。
+     * (仍然很快，用户不太容易感觉到卡顿)
+     *
      * throw symbol
      */
     placeMines (max) {
@@ -350,15 +340,37 @@ const MineSweepData = class {
         if (this._status !== MINEST_PENDING)
             throw MINE_LOGIC_ERROR;
 
-        while (max > 0) {
+        // how many blocks 
+        const size = this.width * this.height;
+        const dict = [];
 
-            let x = Util.rnd(this.width);
-            let y = Util.rnd(this.height);
-
-            if (_set_mine.call(this, x, y) === true)
-            {
-                max --;
+        // 收集已存在的地雷分布(placeMines可多次执行)
+        this.data.forEach(
+            (block, index) => { 
+                if (block.isMine)
+                    dict[ index ] = true;
             }
+        );
+
+        while (max > 0)
+        {
+            const n = Util.rnd(size);
+
+            // 避免重复放置
+            if (typeof(dict[ n ]) === 'boolean') // conflict?
+                continue;
+
+            dict[ n ] = true;
+            const x = n % this.width;
+            const y = (n - x) / this.width;
+
+
+            this.data[ n ].isMine = true;
+            this.mineCount ++;
+            max --;
+
+            // 更新周围的数值
+            _num_surround.call(this, x, y);
         }
     }
 
