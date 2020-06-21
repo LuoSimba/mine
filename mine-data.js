@@ -107,36 +107,19 @@ const MineData = (function () {
 
 	/* private */
 	function _num_surround(x, y) {
-		let list = [
-            [x-1, y-1],  // 左上
-		    [x  , y-1],  // 上
-		    [x+1, y-1],  // 右上
-            [x-1, y  ],  // 左
-		    [x+1, y  ],  // 右
-            [x-1, y+1],  // 左下
-		    [x  , y+1],  // 下
-		    [x+1, y+1]   // 右下
-        ];
 
-        let pt;
-		while (pt = list.shift()) {
+        const list = this.surroundPositions(x, y);
 
-            // 数组的解构赋值
-            const [x, y] = pt;
+        // 数组的解构赋值
+        for (const [x, y] of list) {
+            // isMine?
+            // 本身是地雷也可以放置数值标记，
+            // 但是调用 num 返回为 0 以同其他数值区域相区别
 
-			if (this.IsValid(x, y))
-            {
-                // isMine?
-                // 本身是地雷也可以放置数值标记，
-                // 但是调用 num 返回为 0 以同其他数值区域相区别
-                //
-                //let n = this.data[ this.width * y + x ] & 0b00001111;
-
-                // 标记周围的地雷数量 ++
-                const block = this.data[ this.width * y + x ];
-                block.numInc();
-			}
-		}
+            // 标记周围的地雷数量 ++
+            const block = this.data[ this.width * y + x ];
+            block.numInc();
+        }
 	}
 
 
@@ -219,27 +202,6 @@ const MineData = (function () {
 
             window.requestAnimationFrame(fn);
         }
-    }
-
-
-    function _nearby_positions(x, y) {
-        // 周围的坐标
-        const list = [
-            [x-1, y-1],
-            [x, y-1],
-            [x+1, y-1],
-            [x-1, y],
-            [x+1, y],
-            [x-1, y+1],
-            [x, y+1],
-            [x+1, y+1],
-        ];
-
-        const list2 = list.filter(
-            ([x, y]) => this.IsValid(x, y)
-        );
-
-        return list2;
     }
 
 
@@ -349,7 +311,7 @@ const MineSweepData = class {
         if (block.num <= 0)
             throw MINE_LOGIC_ERROR;
 
-        const nearby = _nearby_positions.call(this, x, y);
+        const nearby = this.surroundPositions(x, y);
 
         const list = nearby.map(
             ([x, y]) => {
@@ -483,6 +445,29 @@ const MineSweepData = class {
             this._status = MINEST_OVER;
             throw MINE_GAME_OVER;
         }
+    }
+
+    /**
+     * 周围有效坐标列表
+     */
+    surroundPositions (x, y) {
+
+        const list = [
+            [x-1, y-1], // top left
+            [x,   y-1], // top
+            [x+1, y-1], // top right
+            [x-1, y],   // left
+            [x+1, y],   // right
+            [x-1, y+1], // bottom left
+            [x,   y+1], // bottom 
+            [x+1, y+1], // bottom right
+        ];
+
+        const list2 = list.filter(
+            ([x, y]) => this.IsValid(x, y)
+        );
+
+        return list2;
     }
 
 };
