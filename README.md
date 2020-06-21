@@ -53,5 +53,4 @@ MineSweep of JavaScript
 * 标记为 "?"
 * 结果没有明确显示输赢
 * 没有时间计算
-* for ... of ...
 

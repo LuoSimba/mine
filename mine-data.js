@@ -313,10 +313,10 @@ const MineSweepData = class {
     ready () {
         const size = this.width * this.height;
 
-        for (let i = 0; i < size; i ++) {
-
-            let block = this.data[ i ];
-
+        // ECMA 13.7 Iteration Statements
+        //
+        // for ... of ...
+        for (let block of this.data) {
             // remove all flags & cover with bricks
             block.clearFlag();
             block.coverBrick();
