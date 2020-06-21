@@ -4,6 +4,7 @@
 const BOX_SIZE = 32;
 const RES = new ResManager();
 const IMG_BLOCK  = RES.LoadImage('block.png');
+const IMG_BLOCK_REVERSE = RES.LoadImage('block-press.png');
 const IMG_GROUND = RES.LoadImage('ground.png');
 const IMG_FLAG   = RES.LoadImage('flag.png');
 const IMG_MINE   = RES.LoadImage('mine.png');
@@ -33,9 +34,9 @@ let statusBar;
 
 // XXX: test
 const hot = {
-    alive: 0,
     x: 0,
     y: 0,
+    type: null,
 };
 
 
@@ -74,15 +75,17 @@ const RenderMapData = (painter) => {
         }
     }
 
-    if (hot.alive > 0) {
-        hot.alive --;
-        painter.save();
-        painter.beginPath();
-        painter.ctx.rect(
-            BOX_SIZE * (hot.x-1), BOX_SIZE * (hot.y-1),
-            BOX_SIZE * 3, BOX_SIZE * 3);
-        painter.stroke();
-        painter.restore();
+    if (hot.type === 'NUM') {
+
+        const surrounds = mapData.surroundPositions(hot.x, hot.y);
+
+        for (const [x, y] of surrounds) {
+
+            const sr = mapData.seek(x, y);
+
+            if (!sr.isFlag && sr.isBrick)
+                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_BLOCK_REVERSE);
+        }
     }
 };
 
@@ -127,6 +130,41 @@ window.onload = function () {
     };
 
     /**
+     * 鼠标左键按下时，记录按下的类型
+     */
+    widget.onmousedown = function (x, y) {
+        if (mapData.isGameOver())
+            return;
+
+        x = Math.floor(x / BOX_SIZE);
+        y = Math.floor(y / BOX_SIZE);
+
+        const block = mapData.seek(x, y);
+
+        if (block.isFlag) {
+            hot.type = null;
+        } else if (block.isBrick) {
+            hot.type = null;
+        } else if (block.num > 0) {
+            hot.type = 'NUM';
+            hot.x = x;
+            hot.y = y;
+        } else {
+            hot.type = null;
+        }
+    };
+
+    widget.onmouseup = function (x, y) {
+        if (mapData.isGameOver())
+            return;
+
+        x = Math.floor(x / BOX_SIZE);
+        y = Math.floor(y / BOX_SIZE);
+
+        hot.type = null;
+    };
+
+    /**
      * 翻开砖块
      */
     widget.onclick = function (x, y) {
@@ -136,10 +174,6 @@ window.onload = function () {
 
         x = Math.floor(x / BOX_SIZE);
         y = Math.floor(y / BOX_SIZE);
-
-        hot.x = x;
-        hot.y = y;
-        hot.alive = 20;
 
         try {
             const block = mapData.seek(x, y);
@@ -203,7 +237,6 @@ window.onload = function () {
         painter.setFont('新宋体', 12, false);
         // Template String
         painter.drawText(10, 40, `FLAG:${flagsLeft}`);
-        painter.drawText(100, 40, `HOT:${hot.alive}`);
         painter.restore();
     };
 

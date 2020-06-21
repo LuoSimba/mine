@@ -9,6 +9,8 @@ const Widget = class {
     // interface
     onclick = null;
     oncontextmenu = null;
+    onmousedown = null;
+    onmouseup = null;
     render = null;
     visible = false;
     _is_append = false;
@@ -45,6 +47,22 @@ const Widget = class {
             if (this.oncontextmenu !== null) {
                 this.oncontextmenu(event.offsetX, event.offsetY);
                 return false;
+            }
+        };
+
+        this.device.onmousedown = (event) => {
+
+
+            // left down
+            if (event.button === 0 && this.onmousedown !== null) {
+                this.onmousedown(event.offsetX, event.offsetY);
+            }
+        };
+
+        this.device.onmouseup = (event) => {
+
+            if (this.onmouseup !== null) {
+                this.onmouseup(event.offsetX, event.offsetY);
             }
         };
 	}
