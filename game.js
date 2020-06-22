@@ -253,8 +253,7 @@ const movie = new Movie(function () {
 });
 
 const GameStart = () => {
-    mapData.clear();
-    mapData.placeMines(99);
+    mapData.resetMines(30);
     mapData.ready();
 
     const win_width  = mapData.width  * BOX_SIZE;

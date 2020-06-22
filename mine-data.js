@@ -97,8 +97,7 @@ const MineBlock = class {
  * usage:
  *
  * let map = new MineData(width, height);
- * map.clear(); 
- * map.placeMines(num);
+ * map.resetMines(num);
  * map.ready();
  *
  * use `map.isGameOver()' to check whether game is over
@@ -193,7 +192,7 @@ const MineSweepData = class {
 
         this._wid = wid;
         this._hgt = hgt;
-        this.clear();
+        this.resetMines(0);
     }
 
     get width () {
@@ -217,27 +216,6 @@ const MineSweepData = class {
         const addr = this.width * y + x;
 
         return this.data[ addr ];
-    }
-
-    /**
-     * 清理战场
-     *
-     * RULE: 清理战场则游戏必须重置为等待状态
-     */
-    clear () {
-
-        // 不再使用 Uint8Array(w, h), ArrayBuffer 作为数据存储
-        this.data = [];
-
-        for (let j = 0; j < this.height; j ++)
-            for (let i = 0; i < this.width; i ++)
-                this.data.push(new MineBlock);
-
-        this._status = MINEST_PENDING;
-        this.uncleanBricks = 0;
-        this.mineCount = 0;
-        this.flagsCount = 0;
-        this.flagsCountYes = 0;
     }
 
     /**
@@ -312,67 +290,69 @@ const MineSweepData = class {
     /**
      * 随机放置地雷
      *
-     * max <= this.width * this.height
+     * RULE: 游戏必须重置为等待状态
      *
-     * RULE: 游戏等待阶段，才能放置地雷
-     *
-     *
-     * 布雷策略：
-     *  a. 设定本次放置地雷目标数量 max
-     *  b. 设定已放置地雷数量 count = 0
-     *  c. 当 count >= max, 执行f
-     *  d. 随机选择一个坐标
-     *   d.1 如果该坐标没有放置地雷，则在此处放置地雷，count ++
-     *  e. 执行c
-     *  f. 结束
-     *
+     * <delete>
      * 假设地图尺寸为 100x100 = 10000,
      * 则放置 max 个地雷需要循环的次数为：
      *  sum(10000/(10000-i)), i in [0, max)
      *
      * 假设放置 9999 个地雷，需要循环执行约为 88K 次。
      * (仍然很快，用户不太容易感觉到卡顿)
+     * </delete>
      *
      * throw symbol
      */
-    placeMines (max) {
+    // 不再使用 Uint8Array(w, h), ArrayBuffer 作为数据存储
+    resetMines (max) {
 
-        if (this._status !== MINEST_PENDING)
+        const size = this.width * this.height;
+        if (max > size)
             throw MINE_LOGIC_ERROR;
 
-        // how many blocks 
-        const size = this.width * this.height;
+        this._status = MINEST_PENDING;
+
         // ECMA 23.2 Set Object
-        const dict = new Set;
+        //const dict = new Set;
+        // dict.has();
+        // dict.add();
 
-        // 收集已存在的地雷分布(placeMines可多次执行)
-        this.data.forEach(
-            (block, index) => { 
-                if (block.isMine)
-                    dict.add(index);
-            }
-        );
+        // 清空旧数据
+        this.data = [];
+        const temp = [];
 
-        while (max > 0)
-        {
-            const n = Util.rnd(size);
+        for (let i = 0; i < size; i ++)
+            temp.push(new MineBlock);
 
-            // 避免重复放置
-            if (dict.has(n)) // conflict?
-                continue;
+        // 在起始位置，放置足够的地雷
+        for (let i = 0; i < max; i ++)
+            temp[ i ].isMine = true;
 
-            dict.add(n);
-            const x = n % this.width;
-            const y = (n - x) / this.width;
+        // 随机抽取到地图中
+        while (temp.length > 0) {
 
+            const n = Util.rnd(temp.length);
 
-            this.data[ n ].isMine = true;
-            this.mineCount ++;
-            max --;
+            const [block] = temp.splice(n, 1);
 
-            // 更新周围的数值
-            _num_surround.call(this, x, y);
+            this.data.push(block);
         }
+
+        // 在地雷周围标上数值
+        for (let j = 0; j < this.height; j ++)
+        {
+            for (let i = 0; i < this.width; i ++)
+            {
+                // 更新周围的数值
+                if (this.data[ this.width * j + i ].isMine)
+                    _num_surround.call(this, i, j);
+            }
+        }
+
+        this.mineCount = max;
+        this.flagsCount = 0;
+        this.flagsCountYes = 0;
+        this.uncleanBricks = 0;
     }
 
     /**
