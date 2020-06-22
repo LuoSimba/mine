@@ -342,13 +342,14 @@ const MineSweepData = class {
 
         // how many blocks 
         const size = this.width * this.height;
-        const dict = [];
+        // ECMA 23.2 Set Object
+        const dict = new Set;
 
         // 收集已存在的地雷分布(placeMines可多次执行)
         this.data.forEach(
             (block, index) => { 
                 if (block.isMine)
-                    dict[ index ] = true;
+                    dict.add(index);
             }
         );
 
@@ -357,10 +358,10 @@ const MineSweepData = class {
             const n = Util.rnd(size);
 
             // 避免重复放置
-            if (typeof(dict[ n ]) === 'boolean') // conflict?
+            if (dict.has(n)) // conflict?
                 continue;
 
-            dict[ n ] = true;
+            dict.add(n);
             const x = n % this.width;
             const y = (n - x) / this.width;
 
