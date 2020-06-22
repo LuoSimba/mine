@@ -1,7 +1,7 @@
 "use strict";
 
 // global setting
-const BOX_SIZE = 32;
+const BOX_SIZE = 30;
 const RES = new ResManager();
 const IMG_BLOCK  = RES.LoadImage('block.png');
 const IMG_BLOCK_REVERSE = RES.LoadImage('block-press.png');
