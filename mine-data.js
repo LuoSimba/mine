@@ -107,7 +107,7 @@ const MineData = (function () {
     }
 
 
-const MineSweepData = class {
+class MineSweepData {
 
     _wid = 0;
     _hgt = 0;
@@ -392,8 +392,7 @@ const MineSweepData = class {
 
         return list2;
     }
-
-};
+}
 
 
 	return MineSweepData;
