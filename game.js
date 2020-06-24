@@ -3,19 +3,21 @@
 // global setting
 const BOX_SIZE = 30;
 const RES = new ResManager();
-const IMG_BLOCK  = RES.LoadImage('block.png');
-const IMG_BLOCK_REVERSE = RES.LoadImage('block-press.png');
-const IMG_GROUND = RES.LoadImage('ground.png');
-const IMG_FLAG   = RES.LoadImage('flag.png');
-const IMG_MINE   = RES.LoadImage('mine.png');
-const IMG_DIGIT_1 = RES.LoadImage('num_1.png');
-const IMG_DIGIT_2 = RES.LoadImage('num_2.png');
-const IMG_DIGIT_3 = RES.LoadImage('num_3.png');
-const IMG_DIGIT_4 = RES.LoadImage('num_4.png');
-const IMG_DIGIT_5 = RES.LoadImage('num_5.png');
-const IMG_DIGIT_6 = RES.LoadImage('num_6.png');
-const IMG_DIGIT_7 = RES.LoadImage('num_7.png');
-const IMG_DIGIT_8 = RES.LoadImage('num_8.png');
+const IMGS = RES.LoadImage('block.png');
+
+const IMG_BLOCK   = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
+const IMG_BLOCK_REVERSE = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
+const IMG_GROUND  = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
+const IMG_FLAG    = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
+const IMG_MINE    = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
+const IMG_DIGIT_1 = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
+const IMG_DIGIT_2 = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
+const IMG_DIGIT_3 = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
+const IMG_DIGIT_4 = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
+const IMG_DIGIT_5 = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
+const IMG_DIGIT_6 = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
+const IMG_DIGIT_7 = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
+const IMG_DIGIT_8 = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
 const NUMS = [
     null,
     IMG_DIGIT_1,
@@ -27,6 +29,18 @@ const NUMS = [
     IMG_DIGIT_7,
     IMG_DIGIT_8,
 ];
+
+function LoadImage(offCanvas, x, y) {
+    const ctx = offCanvas.getContext('2d');
+
+    ctx.drawImage(
+        IMGS,
+        // src
+        x * BOX_SIZE, y * BOX_SIZE, BOX_SIZE, BOX_SIZE,
+        // dst
+        0, 0, BOX_SIZE, BOX_SIZE
+    );
+}
 
 let mapData = new MineData(30, 16); // define map(20, 15)
 let widget; // game window
@@ -244,7 +258,24 @@ window.onload = function () {
         GameStart();
     };
 
-    RES.then(GameStart);
+    RES.then(function () {
+        LoadImage(IMG_MINE, 0, 0);
+        LoadImage(IMG_FLAG, 1, 0);
+        LoadImage(IMG_BLOCK, 2, 0);
+        LoadImage(IMG_BLOCK_REVERSE, 3, 0);
+        LoadImage(IMG_GROUND, 4, 0);
+
+        LoadImage(IMG_DIGIT_1, 1, 1);
+        LoadImage(IMG_DIGIT_2, 2, 1);
+        LoadImage(IMG_DIGIT_3, 3, 1);
+        LoadImage(IMG_DIGIT_4, 4, 1);
+        LoadImage(IMG_DIGIT_5, 5, 1);
+        LoadImage(IMG_DIGIT_6, 6, 1);
+        LoadImage(IMG_DIGIT_7, 7, 1);
+        LoadImage(IMG_DIGIT_8, 8, 1);
+
+        GameStart();
+    });
 };
 
 const movie = new Movie(function () {

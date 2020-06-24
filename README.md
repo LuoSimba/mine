@@ -19,6 +19,8 @@ MineSweep of JavaScript
 
 ## changelog
 
+0624 - 使用 OffscreenCanvas
+
 0619 - 加入翻砖的动画效果
 
 0618 - 游戏增加为三个阶段：准备，开始，结束
