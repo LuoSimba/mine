@@ -30,6 +30,7 @@ const NUMS = [
     IMG_DIGIT_8,
 ];
 
+
 function LoadImage(offCanvas, x, y) {
     const ctx = offCanvas.getContext('2d');
 
@@ -42,9 +43,10 @@ function LoadImage(offCanvas, x, y) {
     );
 }
 
-let mapData = new MineData(30, 16); // define map(20, 15)
-let widget; // game window
-let statusBar;
+let mapData     = new MineData(20, 15); // define map(20, 15)
+const widget    = new Widget; // game window
+const statusBar = new Widget;
+const GROUND = new OffscreenCanvas(mapData.width * BOX_SIZE, mapData.height * BOX_SIZE);
 
 // XXX: test
 const hot = {
@@ -58,34 +60,22 @@ const hot = {
  * 绘制地图数据
  */
 const RenderMapData = (painter) => {
+
+    // 底图
+    painter.drawImage(0, 0, GROUND);
+
     for (let y = 0; y < mapData.height; y ++) {
         for (let x = 0; x < mapData.width; x ++) {
 
             const block = mapData.seek(x, y);
 
             // draw blocks.
-            if (block.isBrick) {
+            if (block.isBrick)
                 painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_BLOCK);
-            } else {
-                // draw ground.
-                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_GROUND);
-
-                // 显示地雷
-                if (block.isMine)
-                {
-                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_MINE);
-                }
-                // 显示数值
-                else if (block.num > 0)
-                {
-                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, NUMS[block.num]);
-                }
-            }
 
             // 绘制红旗
-            if (block.isFlag) {
+            if (block.isFlag)
                 painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_FLAG);
-            }
         }
     }
 
@@ -106,32 +96,15 @@ const RenderMapData = (painter) => {
 const RenderGameOver = (painter) => {
 
     if (mapData.isGameOver()) {
-        painter.save();
-
-        painter.translate(widget.width / 2, widget.height / 2);
-        // frame
-        painter.ctx.fillStyle = 'rgba(255,255,255,.6)';
-        painter.ctx.strokeStyle = 'black';
-        painter.ctx.lineWidth = 2;
-        painter.beginPath();
-        painter.ctx.rect(-100, -50, 200, 100);
-        painter.fill();
-        painter.stroke();
-        // text
-        painter.ctx.fillStyle = 'black';
-        painter.ctx.textAlign = 'center';
-        painter.ctx.textBaseline = 'middle';
-        painter.setFont('新宋体', 30, true);
-        painter.drawText(0, 0, 'Game Over');
-        painter.restore();
+        // todo
     }
+
 };
 
 
 
 window.onload = function () {
 
-    widget = new Widget;
 
     /**
      * 绘制界面
@@ -238,7 +211,6 @@ window.onload = function () {
 
 
     // --
-    statusBar = new Widget;
 
     statusBar.render = function ({painter}) {
 
@@ -284,8 +256,28 @@ const movie = new Movie(function () {
 });
 
 const GameStart = () => {
-    mapData.resetMines(30);
+    mapData.resetMines(20);
     mapData.ready();
+
+    // init ground ui
+    const painter = new Painter(GROUND);
+    for (let j = 0; j < mapData.height; j ++) {
+        for (let i = 0; i < mapData.width; i ++) {
+
+            const block = mapData.seek(i, j);
+
+            // draw ground.
+            painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, IMG_GROUND);
+            if (block.isMine) {
+                // 显示地雷
+                painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, IMG_MINE);
+            } else if (block.num > 0) {
+                // 显示数值
+                painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, NUMS[ block.num ]);
+            }
+        }
+    }
+
 
     const win_width  = mapData.width  * BOX_SIZE;
     const win_height = mapData.height * BOX_SIZE;

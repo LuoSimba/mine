@@ -2,35 +2,57 @@
 /**
  * 绘图类
  */
-const Painter = function (device) {
+class Painter {
 
-    this.ctx = device.getContext('2d');
+    ctx = null;
 
-    // device 改变大小, font 就会重置
+    constructor (device) {
 
-    return;
+        this.ctx = device.getContext('2d');
 
-    // 相当于取得画布的画笔，画笔只有一支
+        // device 改变大小, font 就会重置
 
-    this.ctx.fillStyle = '#000000';
+        return;
 
-    // line
-    this.ctx.lineWidth = 1;  // 线条粗细(不能为0)
-    // miter 尖角
-    // bevel 斜角
-    // round 圆角
-    this.ctx.lineJoin  = 'miter';   // 转角样式
-    // butt   平的（不出头）
-    // round  圆的
-    // square 方的
-    this.ctx.lineCap   = 'butt';   // 线条端点样式
-    this.ctx.strokeStyle = '#000000';  // rgba(255, 0, 0, 0.5)
+        // 相当于取得画布的画笔，画笔只有一支
 
-    // text
-    this.ctx.textBaseline = 'top';
-    this.ctx.textAlign    = 'start';
 
-};
+        // miter 尖角
+        // bevel 斜角
+        // round 圆角
+        this.ctx.lineJoin  = 'miter';   // 拐角样式
+        // butt   平的（不出头）
+        // round  圆的
+        // square 方的
+        this.ctx.lineCap   = 'butt';   // 线帽样式
+
+        // text
+        this.ctx.textBaseline = 'top';   // middle
+        this.ctx.textAlign    = 'start'; // center
+
+    }
+
+    /**
+     * brush = '#000000';
+     */
+    setBrush (brush) {
+        this.ctx.fillStyle = brush;
+    }
+
+    /**
+     * w = 1;
+     * pen = 'rgba(255, 0, 0, .5)';
+     */
+    setPen (w, pen) {
+        this.ctx.lineWidth = w;  // 线条粗细(不能为0)
+        this.ctx.strokeStyle = pen;
+    }
+
+    rect (x, y, w, h) {
+        this.ctx.rect(x, y, w, h);
+    }
+}
+
 
 /**
  * 擦除图像
