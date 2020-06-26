@@ -28,65 +28,11 @@ const MINEST_OVER    = Symbol('status game over');
  *
  * let map = new MineData(width, height);
  * map.resetMines(num);
+ * map.ready();
  *
  * use `map.isGameOver()' to check whether game is over
  */
 const MineData = (function () {
-
-    /**
-     * 清除砖块
-     *
-     * RULE: 如果当前位置越界，直接返回
-     * RULE: 红旗位置受保护，直接返回
-     * RULE: 如果当前位置已经清除，直接返回
-     * RULE: 如果当前位置为地雷，则游戏结束
-     * RULE: 如果当前位置为空，自动清理周围砖块
-     *
-     */
-    function _clear_brick(x, y) {
-        if (!this.IsValid(x, y))
-            return;
-
-        const block = this._bg.getBlock(x, y);
-
-        if (block.isFlag)
-            return;
-
-        if (!block.isBrick)
-            return;
-
-        block.clearBrick();
-        this.uncleanBricks --;
-
-        // see what's under the brick
-        // isMine? then you are dead
-        if (block.isMine)
-        {
-            this._status = MINEST_OVER;
-            throw MINE_GAME_OVER;
-        }
-        else if (block.num === 0) // isEmpty?
-        {
-            const fn2 = () => {
-                _clear_brick.call(this, x-1, y-1);
-                _clear_brick.call(this, x+1, y-1);
-                _clear_brick.call(this, x+1, y+1);
-                _clear_brick.call(this, x-1, y+1);
-            };
-
-            const fn = () => {
-                _clear_brick.call(this, x-1, y  );
-                _clear_brick.call(this, x,   y-1);
-                _clear_brick.call(this, x+1, y  );
-                _clear_brick.call(this, x,   y+1);
-
-                window.requestAnimationFrame(fn2);
-            };
-
-            window.requestAnimationFrame(fn);
-        }
-    }
-
 
 class MineSweeper {
 
@@ -97,9 +43,11 @@ class MineSweeper {
     uncleanBricks = 0; // 剩余未清除砖块数量
     _status = MINEST_PENDING;
     _bg = null;
+    _dev_gnd = null;
 
     constructor (wid, hgt) {
         this._bg = new MineBattleground(wid, hgt);
+        this._dev_gnd = new OffscreenCanvas(wid * BOX_SIZE, hgt * BOX_SIZE);
     }
 
     get width () {
@@ -108,6 +56,10 @@ class MineSweeper {
 
     get height () {
         return this._bg.height;
+    }
+
+    get GROUND () {
+        return this._dev_gnd;
     }
 
     /**
@@ -163,7 +115,7 @@ class MineSweeper {
         if (block.num === n)
         {
             nearby.forEach(
-                ([x, y]) => _clear_brick.call(this, x, y)
+                ([x, y]) => this.clearBrick(x, y)
             );
 
             // XXX 这里不需要检查
@@ -211,13 +163,39 @@ class MineSweeper {
         this._status = MINEST_START;
     }
 
+    // init ground ui
+    ready () {
+
+        const painter = new Painter(this.GROUND);
+
+        for (let j = 0; j < this.height; j ++) {
+            for (let i = 0; i < this.width; i ++) {
+
+                const block = this.seek(i, j);
+
+                // draw ground.
+                painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, RES.GROUND);
+
+                if (block.isMine) {
+                    // 显示地雷
+                    painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, RES.MINE);
+                } else if (block.num > 0) {
+                    // 显示数值
+                    painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, RES.NUMS( block.num ));
+                }
+            }
+        }
+    }
+
 	IsValid (x, y) {
         return this._bg.isValid(x, y);
 	}
 
     /**
-     * 如果标记为红旗，则报错
-     * 如果已经被打开，则报错
+     * 清除砖块
+     *
+     * 如果标记为红旗，则什么也不做
+     * 如果已经被打开，则什么也不做
      *
      * 如果覆盖着砖块，就打开砖块
      *   如果遇到地雷，游戏结束
@@ -227,18 +205,50 @@ class MineSweeper {
      */
     clearBrick (x, y) {
 
+        if (!this.IsValid(x, y))
+            return;
+
         const block = this._bg.getBlock(x, y);
 
         if (block.isFlag)
-            throw MINE_LOGIC_ERROR;
+            return;
 
         if (!block.isBrick)
-            throw MINE_LOGIC_ERROR;
+            return;
 
-        _clear_brick.call(this, x, y);
+        block.clearBrick();
+        this.uncleanBricks --;
+
+        // see what's under the brick
+        // isMine? then you are dead
+        if (block.isMine)
+        {
+            this._status = MINEST_OVER;
+            throw MINE_GAME_OVER;
+        }
+        else if (block.num === 0) // isEmpty?
+        {
+            const fn2 = () => {
+                this.clearBrick(x-1, y-1);
+                this.clearBrick(x+1, y-1);
+                this.clearBrick(x+1, y+1);
+                this.clearBrick(x-1, y+1);
+            };
+
+            const fn = () => {
+                this.clearBrick(x-1, y  );
+                this.clearBrick(x,   y-1);
+                this.clearBrick(x+1, y  );
+                this.clearBrick(x,   y+1);
+
+                window.requestAnimationFrame(fn2);
+            };
+
+            window.requestAnimationFrame(fn);
+        }
 
         // XXX 这里不需要检查
-        this.checkSuccess();
+        //this.checkSuccess();
     }
 
     /**

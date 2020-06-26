@@ -5,7 +5,6 @@
 let mapData     = new MineData(10, 10); // define map(20, 15)
 const widget    = new Widget; // game window
 const statusBar = new Widget;
-const GROUND = new OffscreenCanvas(mapData.width * BOX_SIZE, mapData.height * BOX_SIZE);
 
 // XXX: test
 const hot = {
@@ -21,7 +20,7 @@ const hot = {
 const RenderMapData = (painter) => {
 
     // 底图
-    painter.drawImage(0, 0, GROUND);
+    painter.drawImage(0, 0, mapData.GROUND);
 
     for (let y = 0; y < mapData.height; y ++) {
         for (let x = 0; x < mapData.width; x ++) {
@@ -206,26 +205,7 @@ const movie = new Movie(function () {
 
 const GameStart = () => {
     mapData.resetMines(10);
-
-    // init ground ui
-    const painter = new Painter(GROUND);
-    for (let j = 0; j < mapData.height; j ++) {
-        for (let i = 0; i < mapData.width; i ++) {
-
-            const block = mapData.seek(i, j);
-
-            // draw ground.
-            painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, RES.GROUND);
-            if (block.isMine) {
-                // 显示地雷
-                painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, RES.MINE);
-            } else if (block.num > 0) {
-                // 显示数值
-                painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, RES.NUMS( block.num ));
-            }
-        }
-    }
-
+    mapData.ready();
 
     const win_width  = mapData.width  * BOX_SIZE;
     const win_height = mapData.height * BOX_SIZE;

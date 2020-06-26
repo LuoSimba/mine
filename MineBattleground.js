@@ -80,7 +80,11 @@ class MineBattleground {
     }
 
     getBlock (x, y) {
-        return this._data[ this.width * y + x ];
+
+        if (this.isValid(x, y))
+            return this._data[ this.width * y + x ];
+        else
+            throw new Error('invalid position');
     }
 
     ready () {
