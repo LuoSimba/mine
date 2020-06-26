@@ -26,14 +26,12 @@ const MINEST_OVER    = Symbol('status game over');
 /**
  * usage:
  *
- * let map = new MineData(width, height);
+ * let map = new MineSweeper(width, height);
  * map.resetMines(num);
  * map.ready();
  *
  * use `map.isGameOver()' to check whether game is over
  */
-const MineData = (function () {
-
 class MineSweeper {
 
     // state
@@ -44,10 +42,12 @@ class MineSweeper {
     _status = MINEST_PENDING;
     _bg = null;
     _dev_gnd = null;
+    _widget_main = null; // game window
 
     constructor (wid, hgt) {
         this._bg = new MineBattleground(wid, hgt);
         this._dev_gnd = new OffscreenCanvas(wid * BOX_SIZE, hgt * BOX_SIZE);
+        this._widget_main = new Widget;
     }
 
     get width () {
@@ -60,6 +60,10 @@ class MineSweeper {
 
     get GROUND () {
         return this._dev_gnd;
+    }
+
+    get WIDGET () {
+        return this._widget_main;
     }
 
     /**
@@ -307,8 +311,4 @@ class MineSweeper {
         return this._bg.surroundPositions(x, y);
     }
 }
-
-
-	return MineSweeper;
-})();
 

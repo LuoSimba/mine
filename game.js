@@ -2,8 +2,7 @@
 
 // global setting
 
-let mapData     = new MineData(10, 10); // define map(20, 15)
-const widget    = new Widget; // game window
+const game = new MineSweeper(10, 10); // define map(20, 15)
 const statusBar = new Widget;
 
 // XXX: test
@@ -20,12 +19,12 @@ const hot = {
 const RenderMapData = (painter) => {
 
     // 底图
-    painter.drawImage(0, 0, mapData.GROUND);
+    painter.drawImage(0, 0, game.GROUND);
 
-    for (let y = 0; y < mapData.height; y ++) {
-        for (let x = 0; x < mapData.width; x ++) {
+    for (let y = 0; y < game.height; y ++) {
+        for (let x = 0; x < game.width; x ++) {
 
-            const block = mapData.seek(x, y);
+            const block = game.seek(x, y);
 
             // draw blocks.
             if (block.isBrick)
@@ -39,11 +38,11 @@ const RenderMapData = (painter) => {
 
     if (hot.type === 'NUM') {
 
-        const surrounds = mapData.surroundPositions(hot.x, hot.y);
+        const surrounds = game.surroundPositions(hot.x, hot.y);
 
         for (const [x, y] of surrounds) {
 
-            const sr = mapData.seek(x, y);
+            const sr = game.seek(x, y);
 
             if (!sr.isFlag && sr.isBrick)
                 painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.BRICK_REVERSE);
@@ -53,9 +52,9 @@ const RenderMapData = (painter) => {
 
 const RenderGameOver = (painter) => {
 
-    if (mapData.isGameOver()) {
+    if (game.isGameOver()) {
         painter.save();
-        painter.translate(mapData.width * BOX_SIZE / 2, mapData.height * BOX_SIZE / 2);
+        painter.translate(game.width * BOX_SIZE / 2, game.height * BOX_SIZE / 2);
         painter.ctx.textAlign = 'center';
         painter.ctx.textBaseline = 'middle';
         painter.drawText(0, 0, 'Game Over');
@@ -74,7 +73,7 @@ window.onload = function () {
      *
      * 游戏结束的显示方式有点不一样
      */
-    widget.render = function ({painter}) {
+    game.WIDGET.render = function ({painter}) {
         RenderMapData(painter);
         RenderGameOver(painter);
     };
@@ -82,14 +81,14 @@ window.onload = function () {
     /**
      * 鼠标左键按下时，记录按下的类型
      */
-    widget.onmousedown = function (x, y) {
-        if (mapData.isGameOver())
+    game.WIDGET.onmousedown = function (x, y) {
+        if (game.isGameOver())
             return;
 
         x = Math.floor(x / BOX_SIZE);
         y = Math.floor(y / BOX_SIZE);
 
-        const block = mapData.seek(x, y);
+        const block = game.seek(x, y);
 
         if (block.isFlag) {
             hot.type = null;
@@ -104,8 +103,8 @@ window.onload = function () {
         }
     };
 
-    widget.onmouseup = function (x, y) {
-        if (mapData.isGameOver())
+    game.WIDGET.onmouseup = function (x, y) {
+        if (game.isGameOver())
             return;
 
         x = Math.floor(x / BOX_SIZE);
@@ -117,16 +116,16 @@ window.onload = function () {
     /**
      * 翻开砖块
      */
-    widget.onclick = function (x, y) {
+    game.WIDGET.onclick = function (x, y) {
 
-        if (mapData.isGameOver())
+        if (game.isGameOver())
             return;
 
         x = Math.floor(x / BOX_SIZE);
         y = Math.floor(y / BOX_SIZE);
 
         try {
-            const block = mapData.seek(x, y);
+            const block = game.seek(x, y);
 
             if (block.isFlag)
             {
@@ -135,11 +134,11 @@ window.onload = function () {
             else if (block.isBrick)
             {
                 // 打开砖块
-                mapData.clearBrick(x, y);
+                game.clearBrick(x, y);
             }
             else if (block.num > 0)
             {
-                mapData.clearNearby(x, y);
+                game.clearNearby(x, y);
             }
             else
             {
@@ -154,19 +153,19 @@ window.onload = function () {
     /**
      * 放置旗帜
      */
-    widget.oncontextmenu = function (x, y) {
+    game.WIDGET.oncontextmenu = function (x, y) {
 
-        if (mapData.isGameOver())
+        if (game.isGameOver())
             return;
 
         x = Math.floor(x / BOX_SIZE);
         y = Math.floor(y / BOX_SIZE);
 
-        if (!mapData.IsValid(x, y))
+        if (!game.IsValid(x, y))
             return;
 
         try {
-            mapData.toggleFlag(x, y);
+            game.toggleFlag(x, y);
         } catch (e) {
             GameException(e);
         }
@@ -178,7 +177,7 @@ window.onload = function () {
     statusBar.render = function ({painter}) {
 
         // 剩余可用红旗数
-        const flagsLeft = mapData.mineCount - mapData.flagsCount;
+        const flagsLeft = game.mineCount - game.flagsCount;
 
         painter.clearRect(0, 0, this.width, this.height);
 
@@ -199,21 +198,21 @@ window.onload = function () {
 };
 
 const movie = new Movie(function () {
-    widget.update();
+    game.WIDGET.update();
     statusBar.update();
 });
 
 const GameStart = () => {
-    mapData.resetMines(10);
-    mapData.ready();
+    game.resetMines(10);
+    game.ready();
 
-    const win_width  = mapData.width  * BOX_SIZE;
-    const win_height = mapData.height * BOX_SIZE;
+    const win_width  = game.width  * BOX_SIZE;
+    const win_height = game.height * BOX_SIZE;
 
     // -- show multi windows
-    widget.move(30, 30);
-    widget.resize(win_width, win_height);
-    widget.show();
+    game.WIDGET.move(30, 30);
+    game.WIDGET.resize(win_width, win_height);
+    game.WIDGET.show();
 
     statusBar.move(30, 30 + win_height + 10);
     statusBar.resize(win_width, 50);
@@ -238,6 +237,5 @@ const GameException = (e) => {
             throw e;
     }
 };
-
 
 
