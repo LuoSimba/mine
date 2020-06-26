@@ -19,6 +19,9 @@ MineSweep of JavaScript
 
 ## changelog
 
+0626 - 使用 Map
+       优化图片资源的管理
+
 0624 - 使用 OffscreenCanvas
 
 0619 - 加入翻砖的动画效果

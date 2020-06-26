@@ -1,17 +1,19 @@
-"use strict";
 
-/*!
- * 加载游戏所需的图片资源
- *
- * 只有一张图片，所以不需要复杂的加载功能
- */
 const BOX_SIZE = 30;
 
 
+/**
+ * 加载游戏所需的图片资源
+ *
+ * 并提供统一的资源访问方式
+ *
+ * 只有一张图片，所以不需要复杂的加载功能
+ */
 const RES = new class {
 
     pic = new Image;
     onload = null;
+    // ECMA 23.1 Map Objects
     dict = new Map;
 
     constructor () {
