@@ -1,10 +1,13 @@
 
 
 
+/**
+ * 地图块
+ */
 class MineBlock {
     _is_flag  = false;
     _is_brick = false;
-    _is_mine = false;
+    _is_mine  = false;
     _num = 0;
 
     constructor () {
@@ -33,6 +36,10 @@ class MineBlock {
             return 0;
 
         return this._num;
+    }
+
+    clearNum () {
+        this._num = 0;
     }
 
     numInc () {

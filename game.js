@@ -43,7 +43,7 @@ function LoadImage(offCanvas, x, y) {
     );
 }
 
-let mapData     = new MineData(20, 15); // define map(20, 15)
+let mapData     = new MineData(10, 10); // define map(20, 15)
 const widget    = new Widget; // game window
 const statusBar = new Widget;
 const GROUND = new OffscreenCanvas(mapData.width * BOX_SIZE, mapData.height * BOX_SIZE);
@@ -96,7 +96,12 @@ const RenderMapData = (painter) => {
 const RenderGameOver = (painter) => {
 
     if (mapData.isGameOver()) {
-        // todo
+        painter.save();
+        painter.translate(mapData.width * BOX_SIZE / 2, mapData.height * BOX_SIZE / 2);
+        painter.ctx.textAlign = 'center';
+        painter.ctx.textBaseline = 'middle';
+        painter.drawText(0, 0, 'Game Over');
+        painter.restore();
     }
 
 };
@@ -256,8 +261,7 @@ const movie = new Movie(function () {
 });
 
 const GameStart = () => {
-    mapData.resetMines(20);
-    mapData.ready();
+    mapData.resetMines(10);
 
     // init ground ui
     const painter = new Painter(GROUND);

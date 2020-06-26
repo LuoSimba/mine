@@ -28,29 +28,10 @@ const MINEST_OVER    = Symbol('status game over');
  *
  * let map = new MineData(width, height);
  * map.resetMines(num);
- * map.ready();
  *
  * use `map.isGameOver()' to check whether game is over
  */
 const MineData = (function () {
-
-	/* private */
-	function _num_surround(x, y) {
-
-        const list = this.surroundPositions(x, y);
-
-        // 数组的解构赋值
-        for (const [x, y] of list) {
-            // isMine?
-            // 本身是地雷也可以放置数值标记，
-            // 但是调用 num 返回为 0 以同其他数值区域相区别
-
-            // 标记周围的地雷数量 ++
-            const block = this.data[ this.width * y + x ];
-            block.numInc();
-        }
-	}
-
 
     /**
      * 清除砖块
@@ -66,7 +47,7 @@ const MineData = (function () {
         if (!this.IsValid(x, y))
             return;
 
-        const block = this.data[ this.width * y + x ];
+        const block = this._bg.getBlock(x, y);
 
         if (block.isFlag)
             return;
@@ -109,28 +90,24 @@ const MineData = (function () {
 
 class MineSweepData {
 
-    _wid = 0;
-    _hgt = 0;
     // state
     mineCount = 0;     // 当前存在的地雷数
     flagsCount = 0;    // 当前已用的红旗数
     flagsCountYes = 0; // 有效红旗数
     uncleanBricks = 0; // 剩余未清除砖块数量
     _status = MINEST_PENDING;
+    _bg = null;
 
     constructor (wid, hgt) {
-
-        this._wid = wid;
-        this._hgt = hgt;
-        this.resetMines(0);
+        this._bg = new MineBattleground(wid, hgt);
     }
 
     get width () {
-        return this._wid;
+        return this._bg.width;
     }
 
     get height () {
-        return this._hgt;
+        return this._bg.height;
     }
 
     /**
@@ -143,32 +120,7 @@ class MineSweepData {
         if (!this.IsValid(x, y))
             throw MINE_INVALID_POS;
 
-        const addr = this.width * y + x;
-
-        return this.data[ addr ];
-    }
-
-    /**
-     * 准备开始游戏
-     *
-     * 全部覆盖砖块
-     */
-    ready () {
-        const size = this.width * this.height;
-
-        // ECMA 13.7 Iteration Statements
-        //
-        // for ... of ...
-        for (let block of this.data) {
-            // remove all flags & cover with bricks
-            block.clearFlag();
-            block.coverBrick();
-        }
-
-        this._status = MINEST_START;
-        this.uncleanBricks = size;
-        this.flagsCount = 0;
-        this.flagsCountYes = 0;
+        return this._bg.getBlock(x, y);
     }
 
     /**
@@ -187,16 +139,18 @@ class MineSweepData {
      */
     clearNearby (x, y) {
 
-        const block = this.data[ this.width * y + x ];
+        const block = this._bg.getBlock(x, y);
 
         if (block.num <= 0)
             throw MINE_LOGIC_ERROR;
 
-        const nearby = this.surroundPositions(x, y);
+        const nearby = this._bg.surroundPositions(x, y);
 
         const list = nearby.map(
             ([x, y]) => {
-                return (this.data[ this.width * y + x ].isFlag) ? 1 : 0
+                return (
+                    this._bg.getBlock(x, y).isFlag
+                    ) ? 1 : 0
             }
         );
 
@@ -236,60 +190,29 @@ class MineSweepData {
     // 不再使用 Uint8Array(w, h), ArrayBuffer 作为数据存储
     resetMines (max) {
 
-        const size = this.width * this.height;
-        if (max > size)
+        this._status = MINEST_PENDING;
+
+        if (max > this._bg.size)
             throw MINE_LOGIC_ERROR;
 
-        this._status = MINEST_PENDING;
+        this._bg.placeMines(max);
+        this._bg.ready();
+
 
         // ECMA 23.2 Set Object
         //const dict = new Set;
         // dict.has();
         // dict.add();
 
-        // 清空旧数据
-        this.data = [];
-        const temp = [];
-
-        for (let i = 0; i < size; i ++)
-            temp.push(new MineBlock);
-
-        // 在起始位置，放置足够的地雷
-        for (let i = 0; i < max; i ++)
-            temp[ i ].isMine = true;
-
-        // 随机抽取到地图中
-        while (temp.length > 0) {
-
-            const n = Util.rnd(temp.length);
-
-            const [block] = temp.splice(n, 1);
-
-            this.data.push(block);
-        }
-
-        // 在地雷周围标上数值
-        for (let j = 0; j < this.height; j ++)
-        {
-            for (let i = 0; i < this.width; i ++)
-            {
-                // 更新周围的数值
-                if (this.data[ this.width * j + i ].isMine)
-                    _num_surround.call(this, i, j);
-            }
-        }
-
         this.mineCount = max;
         this.flagsCount = 0;
         this.flagsCountYes = 0;
-        this.uncleanBricks = 0;
+        this.uncleanBricks = this._bg.size;
+        this._status = MINEST_START;
     }
 
-    /**
-     * is address valid?
-     */
 	IsValid (x, y) {
-		return (x >= 0 && x < this.width) && (y >= 0 && y < this.height);
+        return this._bg.isValid(x, y);
 	}
 
     /**
@@ -304,7 +227,7 @@ class MineSweepData {
      */
     clearBrick (x, y) {
 
-        const block = this.data[ this.width * y + x ];
+        const block = this._bg.getBlock(x, y);
 
         if (block.isFlag)
             throw MINE_LOGIC_ERROR;
@@ -327,7 +250,7 @@ class MineSweepData {
      */
     toggleFlag (x, y) {
 
-        const block = this.data[ this.width * y + x ];
+        const block = this._bg.getBlock(x, y);
 
         if (!block.isBrick)
             return;
@@ -370,27 +293,8 @@ class MineSweepData {
         }
     }
 
-    /**
-     * 周围有效坐标列表
-     */
     surroundPositions (x, y) {
-
-        const list = [
-            [x-1, y-1], // top left
-            [x,   y-1], // top
-            [x+1, y-1], // top right
-            [x-1, y],   // left
-            [x+1, y],   // right
-            [x-1, y+1], // bottom left
-            [x,   y+1], // bottom 
-            [x+1, y+1], // bottom right
-        ];
-
-        const list2 = list.filter(
-            ([x, y]) => this.IsValid(x, y)
-        );
-
-        return list2;
+        return this._bg.surroundPositions(x, y);
     }
 }
 
