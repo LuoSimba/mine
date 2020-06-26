@@ -88,7 +88,7 @@ const MineData = (function () {
     }
 
 
-class MineSweepData {
+class MineSweeper {
 
     // state
     mineCount = 0;     // 当前存在的地雷数
@@ -299,6 +299,6 @@ class MineSweepData {
 }
 
 
-	return MineSweepData;
+	return MineSweeper;
 })();
 

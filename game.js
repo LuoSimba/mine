@@ -1,47 +1,6 @@
 "use strict";
 
 // global setting
-const BOX_SIZE = 30;
-const RES = new ResManager();
-const IMGS = RES.LoadImage('block.png');
-
-const IMG_BLOCK   = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
-const IMG_BLOCK_REVERSE = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
-const IMG_GROUND  = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
-const IMG_FLAG    = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
-const IMG_MINE    = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
-const IMG_DIGIT_1 = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
-const IMG_DIGIT_2 = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
-const IMG_DIGIT_3 = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
-const IMG_DIGIT_4 = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
-const IMG_DIGIT_5 = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
-const IMG_DIGIT_6 = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
-const IMG_DIGIT_7 = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
-const IMG_DIGIT_8 = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
-const NUMS = [
-    null,
-    IMG_DIGIT_1,
-    IMG_DIGIT_2,
-    IMG_DIGIT_3,
-    IMG_DIGIT_4,
-    IMG_DIGIT_5,
-    IMG_DIGIT_6,
-    IMG_DIGIT_7,
-    IMG_DIGIT_8,
-];
-
-
-function LoadImage(offCanvas, x, y) {
-    const ctx = offCanvas.getContext('2d');
-
-    ctx.drawImage(
-        IMGS,
-        // src
-        x * BOX_SIZE, y * BOX_SIZE, BOX_SIZE, BOX_SIZE,
-        // dst
-        0, 0, BOX_SIZE, BOX_SIZE
-    );
-}
 
 let mapData     = new MineData(10, 10); // define map(20, 15)
 const widget    = new Widget; // game window
@@ -71,11 +30,11 @@ const RenderMapData = (painter) => {
 
             // draw blocks.
             if (block.isBrick)
-                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_BLOCK);
+                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.BRICK);
 
             // 绘制红旗
             if (block.isFlag)
-                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_FLAG);
+                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.FLAG);
         }
     }
 
@@ -88,7 +47,7 @@ const RenderMapData = (painter) => {
             const sr = mapData.seek(x, y);
 
             if (!sr.isFlag && sr.isBrick)
-                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, IMG_BLOCK_REVERSE);
+                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.BRICK_REVERSE);
         }
     }
 };
@@ -235,24 +194,9 @@ window.onload = function () {
         GameStart();
     };
 
-    RES.then(function () {
-        LoadImage(IMG_MINE, 0, 0);
-        LoadImage(IMG_FLAG, 1, 0);
-        LoadImage(IMG_BLOCK, 2, 0);
-        LoadImage(IMG_BLOCK_REVERSE, 3, 0);
-        LoadImage(IMG_GROUND, 4, 0);
 
-        LoadImage(IMG_DIGIT_1, 1, 1);
-        LoadImage(IMG_DIGIT_2, 2, 1);
-        LoadImage(IMG_DIGIT_3, 3, 1);
-        LoadImage(IMG_DIGIT_4, 4, 1);
-        LoadImage(IMG_DIGIT_5, 5, 1);
-        LoadImage(IMG_DIGIT_6, 6, 1);
-        LoadImage(IMG_DIGIT_7, 7, 1);
-        LoadImage(IMG_DIGIT_8, 8, 1);
-
-        GameStart();
-    });
+    // 加载图片
+    RES.start(GameStart);
 };
 
 const movie = new Movie(function () {
@@ -271,13 +215,13 @@ const GameStart = () => {
             const block = mapData.seek(i, j);
 
             // draw ground.
-            painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, IMG_GROUND);
+            painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, RES.GROUND);
             if (block.isMine) {
                 // 显示地雷
-                painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, IMG_MINE);
+                painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, RES.MINE);
             } else if (block.num > 0) {
                 // 显示数值
-                painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, NUMS[ block.num ]);
+                painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, RES.NUMS( block.num ));
             }
         }
     }
