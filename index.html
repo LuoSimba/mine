@@ -15,10 +15,26 @@ body { background: green; }
 <script type="text/javascript" src="MineBlock.js"></script>
 <script type="text/javascript" src="MineBattleground.js"></script>
 <script type="text/javascript" src="MineSweeper.js"></script>
-<script type="text/javascript" src="game.js"></script>
 </head>
 
 <body>
+    <script type="text/javascript">
+        /**
+         * 开始游戏
+         */
+        function GameStart () {
+            game.resetMines(99);
+            game.ready();
+            game.refresh();
+        }
+
+        const game = new MineSweeper(30, 16);
+
+        window.onload = function () {
+            // 加载图片
+            RES.start(GameStart);
+        };
+    </script>
 </body>
 </html>
 
