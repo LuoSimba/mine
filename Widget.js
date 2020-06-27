@@ -54,7 +54,7 @@ const Widget = class {
 
 
             // left down
-            if (event.button === 0 && this.onmousedown !== null) {
+            if (event.button === MOUSE_BTN_LEFT && this.onmousedown !== null) {
                 this.onmousedown(event.offsetX, event.offsetY);
             }
         };
