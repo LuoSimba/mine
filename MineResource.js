@@ -28,6 +28,10 @@ const RES = new class {
             this.LoadImage('brick', 2, 0);
             this.LoadImage('brick-reverse', 3, 0);
             this.LoadImage('ground', 4, 0);
+            this.LoadImage('brick-glass', 5, 0);
+            this.LoadImage('flag-hit', 6, 0);
+            this.LoadImage('boom', 7, 0);
+            this.LoadImage('flag-miss', 8, 0);
 
             this.LoadImage('digit-1', 1, 1);
             this.LoadImage('digit-2', 2, 1);
@@ -75,6 +79,18 @@ const RES = new class {
         return this.dict.get('flag');
     }
 
+    get FLAG_HIT () {
+        return this.dict.get('flag-hit');
+    }
+
+    get FLAG_MISS () {
+        return this.dict.get('flag-miss');
+    }
+
+    get BOOM () {
+        return this.dict.get('boom');
+    }
+
     get GROUND () {
         return this.dict.get('ground');
     }
@@ -85,6 +101,10 @@ const RES = new class {
 
     get BRICK_REVERSE () {
         return this.dict.get('brick-reverse');
+    }
+
+    get BRICK_GLASS () {
+        return this.dict.get('brick-glass');
     }
 
     NUMS (n) {

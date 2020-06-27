@@ -20,6 +20,7 @@ MineSweep of JavaScript
 ## changelog
 
 0627 - 按需执行动画
+       游戏结束细节展示
 
 0626 - 使用 Map
        优化图片资源的管理
@@ -56,6 +57,6 @@ MineSweep of JavaScript
 ## TODO
 
 * 标记为 "?"
-* 结果没有明确显示输赢
 * 没有时间计算
+* 点击边缘触发非法坐标
 

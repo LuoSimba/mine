@@ -172,6 +172,37 @@ class MineSweeper {
         }
     };
 
+    /**
+     * 绘制游戏主界面(游戏结束时)
+     */
+    _render_main_gg = ({painter}) => {
+
+        // 底图
+        painter.drawImage(0, 0, this.GROUND);
+
+        for (let y = 0; y < this.height; y ++) {
+            for (let x = 0; x < this.width; x ++) {
+
+                const block = this.seek(x, y);
+
+                // 判断红旗是否正确
+                if (block.isFlag) {
+                    if (block.isBrick) 
+                        painter.drawImage(BOX_SIZE * x, BOX_SIZE *y, RES.BRICK);
+
+                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y,
+                            block.isMine ? RES.FLAG_HIT : RES.FLAG_MISS);
+                }
+                // 只有砖块
+                else if (block.isBrick) {
+                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y,
+                            block.isMine ? RES.BRICK_GLASS : RES.BRICK);
+                }
+            }
+        }
+    };
+
+
     _render_status = ({painter, width, height}) => {
         // 剩余可用红旗数
         const flagsLeft = this.mineCount - this.flagsCount;
@@ -197,7 +228,6 @@ class MineSweeper {
         this.WIDGET.onmouseup     = this._slot_mouseup;
         this.WIDGET.oncontextmenu = this._slot_contextmenu;
         this.WIDGET.onclick       = this._slot_click;
-        this.WIDGET.render        = this._render_main;
 
         // ---
         this.STATUS.onclick = GameStart; // XXX
@@ -348,6 +378,9 @@ class MineSweeper {
             }
         }
 
+
+        this.WIDGET.render = this._render_main;
+
         this.WIDGET.move(30, 30);
         this.WIDGET.resize(this.width * BOX_SIZE, this.height * BOX_SIZE);
         this.WIDGET.show();
@@ -394,6 +427,8 @@ class MineSweeper {
         // isMine? then you are dead
         if (block.isMine)
         {
+            const p = new Painter(this.GROUND);
+            p.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.BOOM);
             this._status = MINEST_OVER;
             throw MINE_GAME_OVER;
         }
@@ -529,6 +564,7 @@ class MineSweeper {
 
         switch (e) {
             case MINE_GAME_OVER:
+                this.WIDGET.render = this._render_main_gg;
                 this.refresh();
                 break;
             case MINE_INVALID_POS:
