@@ -137,6 +137,55 @@ class MineSweeper {
         }
     };
 
+    /**
+     * 绘制游戏主界面
+     */
+    _render_main = ({painter}) => {
+
+        // 底图
+        painter.drawImage(0, 0, this.GROUND);
+
+        for (let y = 0; y < this.height; y ++) {
+            for (let x = 0; x < this.width; x ++) {
+
+                const block = this.seek(x, y);
+
+                if (block.isBrick)
+                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.BRICK);
+
+                if (block.isFlag)
+                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.FLAG);
+            }
+        }
+
+        if (this.HOT.type === 'NUM') {
+
+            const surrounds = this.surroundPositions(this.HOT.x, this.HOT.y);
+
+            for (const [x, y] of surrounds) {
+
+                const sr = this.seek(x, y);
+
+                if (!sr.isFlag && sr.isBrick)
+                    painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.BRICK_REVERSE);
+            }
+        }
+    };
+
+    _render_status = ({painter, WID, HGT}) => {
+        // 剩余可用红旗数
+        const flagsLeft = this.mineCount - this.flagsCount;
+
+        painter.clearRect(0, 0, WID, HGT);
+
+        painter.save();
+        painter.setFont('新宋体', 12, false);
+        // Template String
+        painter.drawText(10, 40, `FLAG:${flagsLeft}`);
+        painter.restore();
+    };
+
+
     constructor (wid, hgt) {
         this._bg = new MineBattleground(wid, hgt);
         this._dev_gnd = new OffscreenCanvas(wid * BOX_SIZE, hgt * BOX_SIZE);
@@ -148,9 +197,11 @@ class MineSweeper {
         this.WIDGET.onmouseup     = this._slot_mouseup;
         this.WIDGET.oncontextmenu = this._slot_contextmenu;
         this.WIDGET.onclick       = this._slot_click;
+        this.WIDGET.render        = this._render_main;
 
         // ---
         this.STATUS.onclick = GameStart; // XXX
+        this.STATUS.render  = this._render_status;
     }
 
     get width () {
