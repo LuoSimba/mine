@@ -50,13 +50,107 @@ class MineSweeper {
     _status = MINEST_PENDING;
     _bg = null;
     _dev_gnd = null;
-    _widget_main = null; // game window
+    // game window
+    _widget_main   = null;
+    _widget_status = null;
     _hot = new HotSpot;
+
+    /**
+     * 鼠标左键按下时，记录坐标和类型
+     */
+    _slot_mousedown = (x, y) => {
+
+        if (this.isGameOver())
+            return;
+
+        x = Math.floor(x / BOX_SIZE);
+        y = Math.floor(y / BOX_SIZE);
+
+        this.setHot(x, y);
+        this.refresh();
+    };
+
+    /**
+     * 鼠标释放时，清除热点
+     */
+    _slot_mouseup = (x, y) => {
+
+        if (this.isGameOver())
+            return;
+
+        x = Math.floor(x / BOX_SIZE);
+        y = Math.floor(y / BOX_SIZE);
+
+        this.clearHot();
+        this.refresh();
+    };
+
+    /**
+     * 右键放置红旗
+     */
+    _slot_contextmenu = (x, y) => {
+        if (this.isGameOver())
+            return;
+
+        x = Math.floor(x / BOX_SIZE);
+        y = Math.floor(y / BOX_SIZE);
+
+        try {
+            this.toggleFlag(x, y);
+        } catch (e) {
+            this.GameException(e);
+        }
+    };
+
+    /**
+     * 翻开砖块
+     */
+    _slot_click = (x, y) => {
+        if (this.isGameOver())
+            return;
+
+        x = Math.floor(x / BOX_SIZE);
+        y = Math.floor(y / BOX_SIZE);
+
+        try {
+            const block = this.seek(x, y);
+
+            if (block.isFlag)
+            {
+                // do nothing, 红旗不可操作
+            }
+            else if (block.isBrick)
+            {
+                // 打开砖块
+                this.clearBrick(x, y);
+            }
+            else if (block.num > 0)
+            {
+                this.clearNearby(x, y);
+            }
+            else
+            {
+                // 剩下的都是空地，不能点击
+            }
+        } catch (e) {
+            this.GameException(e);
+        }
+    };
 
     constructor (wid, hgt) {
         this._bg = new MineBattleground(wid, hgt);
         this._dev_gnd = new OffscreenCanvas(wid * BOX_SIZE, hgt * BOX_SIZE);
-        this._widget_main = new Widget;
+        this._widget_main    = new Widget;
+        this._widget_status  = new Widget;
+
+        // ---
+        this.WIDGET.onmousedown   = this._slot_mousedown;
+        this.WIDGET.onmouseup     = this._slot_mouseup;
+        this.WIDGET.oncontextmenu = this._slot_contextmenu;
+        this.WIDGET.onclick       = this._slot_click;
+
+        // ---
+        this.STATUS.onclick = GameStart; // XXX
     }
 
     get width () {
@@ -73,6 +167,10 @@ class MineSweeper {
 
     get WIDGET () {
         return this._widget_main;
+    }
+
+    get STATUS () {
+        return this._widget_status;
     }
 
     /**
@@ -203,10 +301,9 @@ class MineSweeper {
         this.WIDGET.resize(this.width * BOX_SIZE, this.height * BOX_SIZE);
         this.WIDGET.show();
 
-        // XXX
-        statusBar.move(30, 30 + this.height * BOX_SIZE + 10);
-        statusBar.resize(this.width * BOX_SIZE, 50);
-        statusBar.show();
+        this.STATUS.move(30, 30 + this.height * BOX_SIZE + 10);
+        this.STATUS.resize(this.width * BOX_SIZE, 50);
+        this.STATUS.show();
     }
 
 	IsValid (x, y) {
@@ -342,9 +439,7 @@ class MineSweeper {
 
         window.requestAnimationFrame(() => {
             this.WIDGET.update();
-
-            // XXX
-            statusBar.update();
+            this.STATUS.update();
         });
     }
 
@@ -376,6 +471,23 @@ class MineSweeper {
         else if (block.num > 0)
         {
             this.HOT.type = 'NUM';
+        }
+    }
+
+    GameException (e) {
+
+        switch (e) {
+            case MINE_GAME_OVER:
+                this.refresh();
+                break;
+            case MINE_INVALID_POS:
+                alert('坐标超出范围');
+                throw e;
+            case MINE_LOGIC_ERROR:
+                alert('严重错误');
+                throw e;
+            default:
+                throw e;
         }
     }
 }
