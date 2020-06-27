@@ -2,7 +2,7 @@
 
 // global setting
 
-const game = new MineSweeper(10, 10); // define map(20, 15)
+const game = new MineSweeper(30, 16); // define map(20, 15)
 const statusBar = new Widget;
 
 
@@ -180,7 +180,7 @@ window.onload = function () {
 
 
 function GameStart () {
-    game.resetMines(10);
+    game.resetMines(99);
     game.ready();
     game.refresh();
 }

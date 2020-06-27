@@ -19,6 +19,8 @@ MineSweep of JavaScript
 
 ## changelog
 
+0627 - 按需执行动画
+
 0626 - 使用 Map
        优化图片资源的管理
 
@@ -28,8 +30,6 @@ MineSweep of JavaScript
 
 0618 - 游戏增加为三个阶段：准备，开始，结束
        使用 class 来定义类
-
-0615 - 使用动画 requestAnimationFrame。使用动画会**非常**消耗性能
 
 0614 - 使用 Array.filter Array.map Array.reduce Array.forEach (ECMA 22.1.3)
        支持点击数字，翻开周围砖块
