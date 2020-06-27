@@ -172,11 +172,11 @@ class MineSweeper {
         }
     };
 
-    _render_status = ({painter, WID, HGT}) => {
+    _render_status = ({painter, width, height}) => {
         // 剩余可用红旗数
         const flagsLeft = this.mineCount - this.flagsCount;
 
-        painter.clearRect(0, 0, WID, HGT);
+        painter.clearRect(0, 0, width, height);
 
         painter.save();
         painter.setFont('新宋体', 12, false);
