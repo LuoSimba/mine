@@ -23,6 +23,14 @@ const MINEST_PENDING = Symbol('status pending');
 const MINEST_START   = Symbol('status game start');
 const MINEST_OVER    = Symbol('status game over');
 
+
+class HotSpot {
+    x = 0;
+    y = 0;
+    type = null;
+}
+
+
 /**
  * usage:
  *
@@ -43,6 +51,7 @@ class MineSweeper {
     _bg = null;
     _dev_gnd = null;
     _widget_main = null; // game window
+    _hot = new HotSpot;
 
     constructor (wid, hgt) {
         this._bg = new MineBattleground(wid, hgt);
@@ -97,8 +106,8 @@ class MineSweeper {
 
         const block = this._bg.getBlock(x, y);
 
-        if (block.num <= 0)
-            throw MINE_LOGIC_ERROR;
+        if (block.isFlag || block.isBrick || block.num <= 0)
+            return;
 
         const nearby = this._bg.surroundPositions(x, y);
 
@@ -189,6 +198,15 @@ class MineSweeper {
                 }
             }
         }
+
+        this.WIDGET.move(30, 30);
+        this.WIDGET.resize(this.width * BOX_SIZE, this.height * BOX_SIZE);
+        this.WIDGET.show();
+
+        // XXX
+        statusBar.move(30, 30 + this.height * BOX_SIZE + 10);
+        statusBar.resize(this.width * BOX_SIZE, 50);
+        statusBar.show();
     }
 
 	IsValid (x, y) {
@@ -222,6 +240,7 @@ class MineSweeper {
 
         block.clearBrick();
         this.uncleanBricks --;
+        this.refresh();
 
         // see what's under the brick
         // isMine? then you are dead
@@ -264,6 +283,9 @@ class MineSweeper {
      */
     toggleFlag (x, y) {
 
+        if (!this.IsValid(x,y))
+            return;
+
         const block = this._bg.getBlock(x, y);
 
         if (!block.isBrick)
@@ -289,6 +311,8 @@ class MineSweeper {
                 this.checkSuccess(); // throw
             }
         }
+
+        this.refresh();
     }
 
     /**
@@ -309,6 +333,50 @@ class MineSweeper {
 
     surroundPositions (x, y) {
         return this._bg.surroundPositions(x, y);
+    }
+
+    /**
+     * 更新 UI 界面
+     */
+    refresh () {
+
+        window.requestAnimationFrame(() => {
+            this.WIDGET.update();
+
+            // XXX
+            statusBar.update();
+        });
+    }
+
+    get HOT () {
+        return this._hot;
+    }
+
+    clearHot () {
+        this.HOT.type = null;
+    }
+
+    setHot (x, y) {
+        if (!this.IsValid(x, y))
+            return;
+
+        this.HOT.x = x;
+        this.HOT.y = y;
+
+        const block = this.seek(x, y);
+
+        if (block.isFlag)
+        {
+            // do nothing
+        }
+        else if (block.isBrick)
+        {
+            // do nothing
+        }
+        else if (block.num > 0)
+        {
+            this.HOT.type = 'NUM';
+        }
     }
 }
 

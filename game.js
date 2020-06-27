@@ -5,13 +5,6 @@
 const game = new MineSweeper(10, 10); // define map(20, 15)
 const statusBar = new Widget;
 
-// XXX: test
-const hot = {
-    x: 0,
-    y: 0,
-    type: null,
-};
-
 
 /**
  * 绘制地图数据
@@ -36,9 +29,9 @@ const RenderMapData = (painter) => {
         }
     }
 
-    if (hot.type === 'NUM') {
+    if (game.HOT.type === 'NUM') {
 
-        const surrounds = game.surroundPositions(hot.x, hot.y);
+        const surrounds = game.surroundPositions(game.HOT.x, game.HOT.y);
 
         for (const [x, y] of surrounds) {
 
@@ -88,19 +81,8 @@ window.onload = function () {
         x = Math.floor(x / BOX_SIZE);
         y = Math.floor(y / BOX_SIZE);
 
-        const block = game.seek(x, y);
-
-        if (block.isFlag) {
-            hot.type = null;
-        } else if (block.isBrick) {
-            hot.type = null;
-        } else if (block.num > 0) {
-            hot.type = 'NUM';
-            hot.x = x;
-            hot.y = y;
-        } else {
-            hot.type = null;
-        }
+        game.setHot(x, y);
+        game.refresh();
     };
 
     game.WIDGET.onmouseup = function (x, y) {
@@ -110,7 +92,8 @@ window.onload = function () {
         x = Math.floor(x / BOX_SIZE);
         y = Math.floor(y / BOX_SIZE);
 
-        hot.type = null;
+        game.clearHot();
+        game.refresh();
     };
 
     /**
@@ -147,6 +130,7 @@ window.onload = function () {
 
         } catch (e) {
             GameException(e);
+            game.refresh();
         }
     };
 
@@ -160,9 +144,6 @@ window.onload = function () {
 
         x = Math.floor(x / BOX_SIZE);
         y = Math.floor(y / BOX_SIZE);
-
-        if (!game.IsValid(x, y))
-            return;
 
         try {
             game.toggleFlag(x, y);
@@ -197,35 +178,18 @@ window.onload = function () {
     RES.start(GameStart);
 };
 
-const movie = new Movie(function () {
-    game.WIDGET.update();
-    statusBar.update();
-});
 
-const GameStart = () => {
+function GameStart () {
     game.resetMines(10);
     game.ready();
-
-    const win_width  = game.width  * BOX_SIZE;
-    const win_height = game.height * BOX_SIZE;
-
-    // -- show multi windows
-    game.WIDGET.move(30, 30);
-    game.WIDGET.resize(win_width, win_height);
-    game.WIDGET.show();
-
-    statusBar.move(30, 30 + win_height + 10);
-    statusBar.resize(win_width, 50);
-    statusBar.show();
-
-    // 执行动画
-    movie.start();
-};
+    game.refresh();
+}
 
 const GameException = (e) => {
 
     switch (e) {
         case MINE_GAME_OVER:
+            game.refresh();
             break;
         case MINE_INVALID_POS:
             alert('坐标超出范围');
