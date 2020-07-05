@@ -32,7 +32,7 @@ MineSweep of JavaScript
 0618 - 游戏增加为三个阶段：准备，开始，结束
        使用 class 来定义类
 
-0614 - 使用 Array.filter Array.map Array.reduce Array.forEach (ECMA 22.1.3)
+0614 - 使用 Array.filter Array.reduce Array.forEach (ECMA 22.1.3)
        支持点击数字，翻开周围砖块
 
 0613 - 使用 Symbol 抛出异常 (ECMA 6.1.5)

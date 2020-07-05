@@ -290,6 +290,7 @@ class MineSweeper {
 
         const nearby = this._bg.surroundPositions(x, y);
 
+        // 建立 nearby 与 list 的映射关系
         const list = nearby.map(
             ([x, y]) => {
                 return (
