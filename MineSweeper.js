@@ -100,19 +100,7 @@ class MineSweeper {
     };
 
     _slot_click2 = (x, y) => {
-
-        if (0 <= x && x < this.width * BOX_SIZE
-                && 0 <= y && y < this.height * BOX_SIZE)
-        {
-            this._click(x, y);
-        }
-        else if (0 <= x && x < this.width * BOX_SIZE
-                && this.height * BOX_SIZE <= y
-                && y < this.height * BOX_SIZE + 50)
-        {
-            y -= this.height * BOX_SIZE;
-            GameStart(); // XXX
-        }
+        this._click(x, y);
     };
 
     /**
@@ -153,7 +141,7 @@ class MineSweeper {
     /**
      * 绘制游戏主界面
      */
-    _render_main = ({painter}) => {
+    _render_main = (painter) => {
 
         // 底图
         painter.drawImage(0, 0, this.GROUND);
@@ -188,7 +176,7 @@ class MineSweeper {
     /**
      * 绘制游戏主界面(游戏结束时)
      */
-    _render_main_gg = ({painter}) => {
+    _render_main_gg = (painter) => {
 
         // 底图
         painter.drawImage(0, 0, this.GROUND);
@@ -216,19 +204,17 @@ class MineSweeper {
     };
 
 
-    _render_status = (painter) => {
+    _render_status (painter) {
         // 剩余可用红旗数
         const flagsLeft = this.mineCount - this.flagsCount;
 
-
         painter.save();
-        painter.translate(0, this.height * BOX_SIZE);
         painter.clearRect(0, 0, this.width * BOX_SIZE, 50);
         painter.setFont('Monospace', 12, false);
         // Template String
         painter.drawText(10, 40, `FLAG:${flagsLeft}`);
         painter.restore();
-    };
+    }
 
 
     constructor (wid, hgt) {
@@ -236,11 +222,15 @@ class MineSweeper {
         this._dev_gnd = new OffscreenCanvas(wid * BOX_SIZE, hgt * BOX_SIZE);
 
         // ---
-        WIDGET.onmousedown   = this._slot_mousedown;
-        WIDGET.onmouseup     = this._slot_mouseup;
-        WIDGET.oncontextmenu = this._slot_contextmenu;
+        SCREEN.onmousedown   = this._slot_mousedown;
+        SCREEN.onmouseup     = this._slot_mouseup;
+        SCREEN.oncontextmenu = this._slot_contextmenu;
+
         WIDGET.onclick       = this._slot_click2;
 
+        STATUS.render = (arg) => {
+            this._render_status(arg);
+        };
     }
 
     get width () {
@@ -380,16 +370,12 @@ class MineSweeper {
             }
         }
 
+        WIDGET.move(0, 0);
+        WIDGET.resize(this.width * BOX_SIZE, this.height * BOX_SIZE);
+        WIDGET.render = this._render_main;
 
-        WIDGET.render = (arg) => {
-            this._render_main(arg);
-            this._render_status(arg.painter);
-        };
-
-        WIDGET.resize(
-                this.width * BOX_SIZE,
-                this.height * BOX_SIZE + 50
-                );
+        STATUS.move(0, this.height * BOX_SIZE);
+        STATUS.resize(this.width * BOX_SIZE, 50);
     }
 
 	IsValid (x, y) {
@@ -526,7 +512,7 @@ class MineSweeper {
     refresh () {
 
         window.requestAnimationFrame(() => {
-            WIDGET.update();
+            SCREEN.update();
         });
     }
 

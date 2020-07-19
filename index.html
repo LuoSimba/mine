@@ -19,11 +19,18 @@ body { background: green; }
 </head>
 
 <body>
-    <canvas id="WIDGET"></canvas>
+    <canvas id="SCREEN" width="1000" height="1000"></canvas>
 
     <script type="text/javascript">
+        const SCREEN = new Screen('SCREEN');
         // game window
-        const WIDGET = new Widget('WIDGET');
+        const WIDGET = new Widget;
+        const STATUS = new Widget;
+
+        SCREEN.addWindow(WIDGET);
+        SCREEN.addWindow(STATUS);
+
+        STATUS.onclick = GameStart;
 
         /**
          * 开始游戏

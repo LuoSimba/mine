@@ -15,21 +15,56 @@
 // y = event.clientY - bounding.top;
 
 
+/**
+ * 窗口
+ */
+class Widget {
+
+    _x = 0;
+    _y = 0;
+    _w = 300;
+    _h = 150;
+
+    onclick = null;
+    render = null;
+
+    get x () { return this._x; }
+    get y () { return this._y; }
+    get width  () { return this._w; }
+    get height () { return this._h; }
+    get right  () { return this._x + this._w; }
+    get bottom () { return this._y + this._h; }
+
+    move (x, y) {
+        this._x = x;
+        this._y = y;
+    }
+
+    /**
+     * resize window
+     */
+    resize (wid, hgt) {
+        this._w = wid;
+        this._h = hgt;
+
+        //this.update();
+    }
+
+}
 
 
 /**
- * 窗口类
+ * 屏幕
  *
- * 窗口默认没有边框，有利于坐标计算
  */
 // ECMA 14.6 Class Definitions
-const Widget = class {
+const Screen = class {
     // interface
-    onclick = null;
     oncontextmenu = null;
     onmousedown = null;
     onmouseup = null;
-    render = null;
+
+    wnds = [];
 
 	constructor (canvasId) {
 
@@ -43,19 +78,32 @@ const Widget = class {
 
         /**
          * 这里使用 ArrowFunction,
-         * 当这个函数被 onclick 调用时，
+         * 当这个函数被调用时，
          * this 不再是 this.device
          * (this.device 在调用 onclick)
          *
          * this 会是 ArrowFunction 定义时的 this 值
-         * 这里是 Widget 对象
+         * 这里是 Screen 对象
          */
         this.device.onclick = (event) => {
             // layerX  NO
             // pageX   NO
             // offsetX YES
-            if (this.onclick !== null)
-                this.onclick(event.offsetX, event.offsetY);
+            const x = event.offsetX;
+            const y = event.offsetY;
+
+            for (const win of this.wnds) {
+
+                if (win.onclick !== null) {
+
+                    if (win.x <= x && x < win.right
+                            && win.y <= y && y < win.bottom)
+                    {
+                        win.onclick(x - win.x, y - win.y);
+                        return;
+                    }
+                }
+            }
         };
 
         // 单击右键
@@ -85,16 +133,6 @@ const Widget = class {
 	}
 
     /**
-     * resize window
-     */
-    resize (wid, hgt) {
-        this.device.width  = wid;
-        this.device.height = hgt;
-
-        this.update();
-    }
-
-    /**
      * get client width
      */
     get width () {
@@ -116,11 +154,21 @@ const Widget = class {
      * redraw window
      */
     update () {
-        if (this.render !== null) {
-            this.painter.save();
-            this.render(this);
-            this.painter.restore();
+
+        for (const win of this.wnds) {
+
+            if (win.render !== null) {
+                this.painter.save();
+                this.painter.translate(win.x, win.y);
+                // win.render(this)  --> render = function({painter});
+                win.render(this.painter);
+                this.painter.restore();
+            }
         }
+    }
+
+    addWindow (w) {
+        this.wnds.push(w);
     }
 };
 
