@@ -50,9 +50,6 @@ class MineSweeper {
     _status = MINEST_PENDING;
     _bg = null;
     _dev_gnd = null;
-    // game window
-    _widget_main   = null;
-    _widget_status = null;
     _hot = new HotSpot;
 
     /**
@@ -102,10 +99,26 @@ class MineSweeper {
         }
     };
 
+    _slot_click2 = (x, y) => {
+
+        if (0 <= x && x < this.width * BOX_SIZE
+                && 0 <= y && y < this.height * BOX_SIZE)
+        {
+            this._click(x, y);
+        }
+        else if (0 <= x && x < this.width * BOX_SIZE
+                && this.height * BOX_SIZE <= y
+                && y < this.height * BOX_SIZE + 50)
+        {
+            y -= this.height * BOX_SIZE;
+            GameStart(); // XXX
+        }
+    };
+
     /**
      * 翻开砖块
      */
-    _slot_click = (x, y) => {
+    _click (x, y) {
         if (this.isGameOver())
             return;
 
@@ -135,7 +148,7 @@ class MineSweeper {
         } catch (e) {
             this.GameException(e);
         }
-    };
+    }
 
     /**
      * 绘制游戏主界面
@@ -203,14 +216,15 @@ class MineSweeper {
     };
 
 
-    _render_status = ({painter, width, height}) => {
+    _render_status = (painter) => {
         // 剩余可用红旗数
         const flagsLeft = this.mineCount - this.flagsCount;
 
-        painter.clearRect(0, 0, width, height);
 
         painter.save();
-        painter.setFont('新宋体', 12, false);
+        painter.translate(0, this.height * BOX_SIZE);
+        painter.clearRect(0, 0, this.width * BOX_SIZE, 50);
+        painter.setFont('Monospace', 12, false);
         // Template String
         painter.drawText(10, 40, `FLAG:${flagsLeft}`);
         painter.restore();
@@ -220,18 +234,13 @@ class MineSweeper {
     constructor (wid, hgt) {
         this._bg = new MineBattleground(wid, hgt);
         this._dev_gnd = new OffscreenCanvas(wid * BOX_SIZE, hgt * BOX_SIZE);
-        this._widget_main    = new Widget;
-        this._widget_status  = new Widget;
 
         // ---
-        this.WIDGET.onmousedown   = this._slot_mousedown;
-        this.WIDGET.onmouseup     = this._slot_mouseup;
-        this.WIDGET.oncontextmenu = this._slot_contextmenu;
-        this.WIDGET.onclick       = this._slot_click;
+        WIDGET.onmousedown   = this._slot_mousedown;
+        WIDGET.onmouseup     = this._slot_mouseup;
+        WIDGET.oncontextmenu = this._slot_contextmenu;
+        WIDGET.onclick       = this._slot_click2;
 
-        // ---
-        this.STATUS.onclick = GameStart; // XXX
-        this.STATUS.render  = this._render_status;
     }
 
     get width () {
@@ -244,14 +253,6 @@ class MineSweeper {
 
     get GROUND () {
         return this._dev_gnd;
-    }
-
-    get WIDGET () {
-        return this._widget_main;
-    }
-
-    get STATUS () {
-        return this._widget_status;
     }
 
     /**
@@ -380,15 +381,15 @@ class MineSweeper {
         }
 
 
-        this.WIDGET.render = this._render_main;
+        WIDGET.render = (arg) => {
+            this._render_main(arg);
+            this._render_status(arg.painter);
+        };
 
-        this.WIDGET.move(30, 30);
-        this.WIDGET.resize(this.width * BOX_SIZE, this.height * BOX_SIZE);
-        this.WIDGET.show();
-
-        this.STATUS.move(30, 30 + this.height * BOX_SIZE + 10);
-        this.STATUS.resize(this.width * BOX_SIZE, 50);
-        this.STATUS.show();
+        WIDGET.resize(
+                this.width * BOX_SIZE,
+                this.height * BOX_SIZE + 50
+                );
     }
 
 	IsValid (x, y) {
@@ -525,8 +526,7 @@ class MineSweeper {
     refresh () {
 
         window.requestAnimationFrame(() => {
-            this.WIDGET.update();
-            this.STATUS.update();
+            WIDGET.update();
         });
     }
 
@@ -565,7 +565,7 @@ class MineSweeper {
 
         switch (e) {
             case MINE_GAME_OVER:
-                this.WIDGET.render = this._render_main_gg;
+                WIDGET.render = this._render_main_gg;
                 this.refresh();
                 break;
             case MINE_INVALID_POS:

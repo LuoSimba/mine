@@ -30,15 +30,14 @@ const Widget = class {
     onmousedown = null;
     onmouseup = null;
     render = null;
-    visible = false;
-    _is_append = false;
 
-	constructor () {
+	constructor (canvasId) {
 
 		// 创建窗口
         // 创建画布(窗口本身就是画布)
-		this.device = document.createElement('canvas');
-        this.device.style.cssText = 'position:absolute; background:white; box-shadow:2px 2px 3px rgba(0,0,0,.4); display:none;';
+		this.device = document.getElementById(canvasId);
+        this.device.style.cssText = 'background:white;';
+        this.device.style.display = 'block';
 
         this.painter = new Painter(this.device);
 
@@ -86,33 +85,6 @@ const Widget = class {
 	}
 
     /**
-     * show window
-     */
-    show () {
-
-        if (!this._is_append) {
-            document.body.appendChild(this.device);
-            this._is_append = true;
-        }
-
-        if (!this.visible) {
-            this.device.style.display = 'block';
-            this.visible = true;
-            this.update();
-        }
-    }
-
-    /**
-     * hide window
-     */
-    hide () {
-        if (this.visible) {
-            this.device.style.display = 'none';
-            this.visible = false;
-        }
-    }
-
-    /**
      * resize window
      */
     resize (wid, hgt) {
@@ -120,14 +92,6 @@ const Widget = class {
         this.device.height = hgt;
 
         this.update();
-    }
-
-    /**
-     * change window location
-     */
-    move (x, y) {
-        this.device.style.left = x + 'px';
-        this.device.style.top  = y + 'px';
     }
 
     /**
@@ -152,7 +116,7 @@ const Widget = class {
      * redraw window
      */
     update () {
-        if (this.visible && this.render !== null) {
+        if (this.render !== null) {
             this.painter.save();
             this.render(this);
             this.painter.restore();
