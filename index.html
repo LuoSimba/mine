@@ -5,7 +5,8 @@
 <meta charset="utf-8" />
 <title>MineSweep</title>
 <style type="text/css">
-body { background: green; }
+body { background: green; margin:0; }
+#SCREEN { display:block; }
 </style>
 <script type="text/javascript" src="Environment.js"></script>
 <script type="text/javascript" src="Util.js"></script>
@@ -19,10 +20,12 @@ body { background: green; }
 </head>
 
 <body>
-    <canvas id="SCREEN" width="1000" height="1000"></canvas>
+    <canvas id="SCREEN"></canvas>
 
     <script type="text/javascript">
         const SCREEN = new Screen('SCREEN');
+
+
         // game window
         const WIDGET = new Widget;
         const STATUS = new Widget;
@@ -43,7 +46,13 @@ body { background: green; }
 
         const game = new MineSweeper(30, 16);
 
+
+        window.onresize = function () {
+            SCREEN.resize(window.innerWidth, window.innerHeight);
+        };
+
         window.onload = function () {
+            SCREEN.resize(window.innerWidth, window.innerHeight);
             // 加载图片
             RES.start(GameStart);
         };

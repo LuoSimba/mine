@@ -221,12 +221,10 @@ class MineSweeper {
         this._bg = new MineBattleground(wid, hgt);
         this._dev_gnd = new OffscreenCanvas(wid * BOX_SIZE, hgt * BOX_SIZE);
 
-        // ---
-        SCREEN.onmousedown   = this._slot_mousedown;
-        SCREEN.onmouseup     = this._slot_mouseup;
-        SCREEN.oncontextmenu = this._slot_contextmenu;
-
         WIDGET.onclick       = this._slot_click2;
+        WIDGET.oncontextmenu = this._slot_contextmenu;
+        WIDGET.onmousedown   = this._slot_mousedown;
+        WIDGET.onmouseup     = this._slot_mouseup;
 
         STATUS.render = (arg) => {
             this._render_status(arg);
@@ -370,11 +368,11 @@ class MineSweeper {
             }
         }
 
-        WIDGET.move(0, 0);
+        WIDGET.move(30, 30);
         WIDGET.resize(this.width * BOX_SIZE, this.height * BOX_SIZE);
         WIDGET.render = this._render_main;
 
-        STATUS.move(0, this.height * BOX_SIZE);
+        STATUS.move(30, 30 + this.height * BOX_SIZE);
         STATUS.resize(this.width * BOX_SIZE, 50);
     }
 

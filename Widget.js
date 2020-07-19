@@ -26,6 +26,9 @@ class Widget {
     _h = 150;
 
     onclick = null;
+    oncontextmenu = null;
+    onmousedown = null;
+    onmouseup = null;
     render = null;
 
     get x () { return this._x; }
@@ -46,10 +49,7 @@ class Widget {
     resize (wid, hgt) {
         this._w = wid;
         this._h = hgt;
-
-        //this.update();
     }
-
 }
 
 
@@ -58,22 +58,15 @@ class Widget {
  *
  */
 // ECMA 14.6 Class Definitions
-const Screen = class {
-    // interface
-    oncontextmenu = null;
-    onmousedown = null;
-    onmouseup = null;
+const Screen = class
+{
 
     wnds = [];
 
 	constructor (canvasId) {
 
-		// 创建窗口
-        // 创建画布(窗口本身就是画布)
+        // 创建画布(屏幕本身就是画布)
 		this.device = document.getElementById(canvasId);
-        this.device.style.cssText = 'background:white;';
-        this.device.style.display = 'block';
-
         this.painter = new Painter(this.device);
 
         /**
@@ -92,58 +85,81 @@ const Screen = class {
             const x = event.offsetX;
             const y = event.offsetY;
 
-            for (const win of this.wnds) {
+            const win = this._queryWindow(x, y);
+            if (win === null) return;
 
-                if (win.onclick !== null) {
+            if (win.onclick !== null) { 
 
-                    if (win.x <= x && x < win.right
-                            && win.y <= y && y < win.bottom)
-                    {
-                        win.onclick(x - win.x, y - win.y);
-                        return;
-                    }
-                }
+                win.onclick(x - win.x, y - win.y);
             }
         };
+
 
         // 单击右键
         this.device.oncontextmenu = (event) => {
 
-            if (this.oncontextmenu !== null) {
-                this.oncontextmenu(event.offsetX, event.offsetY);
+            const x = event.offsetX;
+            const y = event.offsetY;
+
+            const win = this._queryWindow(x, y);
+            if (win === null) return;
+
+            if (win.oncontextmenu !== null) {
+                win.oncontextmenu(x - win.x, y - win.y);
                 return false;
             }
         };
 
+
         this.device.onmousedown = (event) => {
 
+            // only deal with left button down
+            if (event.button !== MOUSE_BTN_LEFT) return;
 
-            // left down
-            if (event.button === MOUSE_BTN_LEFT && this.onmousedown !== null) {
-                this.onmousedown(event.offsetX, event.offsetY);
+            const x = event.offsetX;
+            const y = event.offsetY;
+
+            const win = this._queryWindow(x, y);
+            if (win === null) return;
+
+            if (win.onmousedown !== null) {
+                win.onmousedown(x - win.x, y - win.y);
             }
         };
 
         this.device.onmouseup = (event) => {
 
-            if (this.onmouseup !== null) {
-                this.onmouseup(event.offsetX, event.offsetY);
+            const x = event.offsetX;
+            const y = event.offsetY;
+
+            const win = this._queryWindow(x, y);
+            if (win === null) return;
+
+            if (win.onmouseup !== null) {
+                win.onmouseup(x - win.x, y - win.y);
             }
         };
 	}
 
     /**
-     * get client width
+     * get screen width
      */
     get width () {
         return this.device.width;
     }
 
     /**
-     * get client height
+     * get screen height
      */
     get height () {
         return this.device.height;
+    }
+
+    resize (wid, hgt) {
+        this.device.width  = wid;
+        this.device.height = hgt;
+
+        this.update();
     }
 
     get ctx () {
@@ -169,6 +185,20 @@ const Screen = class {
 
     addWindow (w) {
         this.wnds.push(w);
+    }
+
+    _queryWindow (x, y) {
+
+        for (const win of this.wnds) {
+            
+            if (
+                    win.x <= x && x < win.right
+                    && win.y <= y && y < win.bottom)
+
+                return win;
+        }
+
+        return null;
     }
 };
 
