@@ -1,18 +1,4 @@
 
-// MouseEvent.offsetX
-// MouseEvent.offsetY
-// 这两个并不是标准属性
-//
-// 应该使用：
-// MouseEvent.clientX
-// MouseEvent.clientY
-// 这两个是相对于 Viewport 的坐标
-//
-// DOMRect bounding = elt.getBoundingClientRect();
-//
-// 计算得到鼠标点击坐标（不考虑元素边框的大小）
-// x = event.clientX - bounding.left;
-// y = event.clientY - bounding.top;
 
 
 /**
@@ -37,6 +23,8 @@ class Widget {
 
     get x () { return this._x; }
     get y () { return this._y; }
+    get left () { return this._x; }
+    get top  () { return this._y; }
     get width  () { return this._w; }
     get height () { return this._h; }
     get right  () { return this._x + this._w; }
@@ -73,5 +61,4 @@ class Widget {
         return this;
     }
 }
-
 

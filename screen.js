@@ -1,7 +1,23 @@
+// MouseEvent.offsetX
+// MouseEvent.offsetY
+// 这两个并不是标准属性
+//
+// 应该使用：
+// MouseEvent.clientX
+// MouseEvent.clientY
+// 这两个是相对于 Viewport 的坐标
+//
+// DOMRect bounding = elt.getBoundingClientRect();
+//
+// 计算得到鼠标点击坐标（不考虑元素边框的大小）
+// x = event.clientX - bounding.left;
+// y = event.clientY - bounding.top;
 
 
 /**
  * 屏幕是一个巨大的画布, 是整个游戏绘图的场所
+ *
+ * 屏幕被分割成一块一块矩形区域(Window)单独管理
  */
 // ECMA 14.6 Class Definitions
 const SCREEN = new class {
@@ -40,10 +56,10 @@ const SCREEN = new class {
         for (const win of this.wnds) {
             
             if (
-                    win.x <= x && x < win.right
-                    && win.y <= y && y < win.bottom)
+                    win.left <= x && x < win.right
+                    && win.top <= y && y < win.bottom)
             {
-                return win.queryWindow(x - win.x, y - win.y);
+                return win.queryWindow(x - win.left, y - win.top);
             }
         }
 
