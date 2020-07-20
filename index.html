@@ -22,8 +22,9 @@ body { background: green; margin:0; }
 <body>
     <canvas id="SCREEN"></canvas>
 
+    <script type="text/javascript" src="screen.js"></script>
+
     <script type="text/javascript">
-        const SCREEN = new Screen('SCREEN');
 
         // game window
         const WIDGET = new Widget;
@@ -49,15 +50,9 @@ body { background: green; margin:0; }
         const game = new MineSweeper(30, 16);
 
 
-        window.onresize = function () {
-            SCREEN.resize(window.innerWidth, window.innerHeight);
-        };
-
         window.onload = function () {
             // 加载图片
             RES.start(GameStart);
-
-            SCREEN.resize(window.innerWidth, window.innerHeight);
 
             BTN_START.render = (painter) => {
                 painter.drawImage(0, 0, RES.BTN_START);

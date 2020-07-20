@@ -57,6 +57,8 @@ class MineSweeper {
     /**
      * 鼠标左键按下时，记录坐标和类型
      */
+    // ArrowFunction
+    // bind(this) to current 'this' symbol
     _slot_mousedown = (x, y) => {
 
         if (this.isGameOver())
