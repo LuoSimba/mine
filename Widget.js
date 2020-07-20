@@ -1,4 +1,5 @@
-
+// 本文是对 screen.js 的补充，
+// 是对 Window 概念的具体实现
 
 
 /**
@@ -41,6 +42,23 @@ class Widget {
     resize (wid, hgt) {
         this._w = wid;
         this._h = hgt;
+    }
+
+    coreRender (painter) {
+
+        if (this.render !== null) {
+            painter.save();
+            this.render(painter);
+            painter.restore();
+        }
+
+        for (const sub of this.children) {
+
+            painter.save();
+            painter.translate(sub.left, sub.top);
+            sub.coreRender(painter);
+            painter.restore();
+        }
     }
 
     addWindow (win) {

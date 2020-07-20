@@ -83,22 +83,11 @@ const SCREEN = new class {
 
         for (const win of this.wnds) {
 
-            if (win.render !== null) {
-                this.painter.save();
-                this.painter.translate(win.x, win.y);
-                // win.render(this)  --> render = function({painter});
-                win.render(this.painter);
-                this.painter.restore();
-            }
-
-            for (const sub of win.children) {
-                if (sub.render !== null) {
-                    this.painter.save();
-                    this.painter.translate(win.x + sub.x, win.y + sub.y);
-                    sub.render(this.painter);
-                    this.painter.restore();
-                }
-            }
+            this.painter.save();
+            this.painter.translate(win.x, win.y);
+            // win.coreRender(this)  --> coreRender = function({painter});
+            win.coreRender(this.painter);
+            this.painter.restore();
         }
     }
 };
