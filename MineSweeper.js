@@ -23,6 +23,8 @@ const MINEST_PENDING = Symbol('status pending');
 const MINEST_START   = Symbol('status game start');
 const MINEST_OVER    = Symbol('status game over');
 
+const COLOR_WINDOW_BG = 'hsl(0, 0%, 100%, .5)';
+
 
 class HotSpot {
     x = 0;
@@ -144,6 +146,8 @@ class MineSweeper {
     _render_main = (painter) => {
 
         // 底图
+        painter.setBrush(COLOR_WINDOW_BG);
+        painter.fillRect(-2, -2, WIDGET.width + 4, WIDGET.height + 4);
         painter.drawImage(0, 0, this.GROUND);
 
         for (let y = 0; y < this.height; y ++) {
@@ -179,6 +183,8 @@ class MineSweeper {
     _render_main_gg = (painter) => {
 
         // 底图
+        painter.setBrush(COLOR_WINDOW_BG);
+        painter.fillRect(-2, -2, WIDGET.width + 4, WIDGET.height + 4);
         painter.drawImage(0, 0, this.GROUND);
 
         for (let y = 0; y < this.height; y ++) {
@@ -204,17 +210,18 @@ class MineSweeper {
     };
 
 
-    _render_status (painter) {
+    _render_status = (painter) => {
         // 剩余可用红旗数
         const flagsLeft = this.mineCount - this.flagsCount;
 
-        painter.save();
-        painter.clearRect(0, 0, this.width * BOX_SIZE, 50);
+        painter.setBrush(COLOR_WINDOW_BG);
+        painter.fillRect(-2, -2, STATUS.width + 4, STATUS.height + 4);
+
         painter.setFont('Monospace', 12, false);
+        painter.setBrush('black');
         // Template String
-        painter.drawText(10, 40, `FLAG:${flagsLeft}`);
-        painter.restore();
-    }
+        painter.drawText(10, 30, `FLAG:${flagsLeft}`);
+    };
 
 
     constructor (wid, hgt) {
@@ -226,9 +233,7 @@ class MineSweeper {
         WIDGET.onmousedown   = this._slot_mousedown;
         WIDGET.onmouseup     = this._slot_mouseup;
 
-        STATUS.render = (arg) => {
-            this._render_status(arg);
-        };
+        STATUS.render = this._render_status;
     }
 
     get width () {
@@ -368,12 +373,13 @@ class MineSweeper {
             }
         }
 
-        WIDGET.move(30, 30);
+        STATUS.move(15, 15);
+        STATUS.resize(this.width * BOX_SIZE, 40);
+        BTN_START.move(STATUS.width/2-15, 5);
+
+        WIDGET.move(15, 15 + 50);
         WIDGET.resize(this.width * BOX_SIZE, this.height * BOX_SIZE);
         WIDGET.render = this._render_main;
-
-        STATUS.move(30, 30 + this.height * BOX_SIZE);
-        STATUS.resize(this.width * BOX_SIZE, 50);
     }
 
 	IsValid (x, y) {

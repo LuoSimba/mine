@@ -32,6 +32,7 @@ const RES = new class {
             this.LoadImage('flag-hit', 6, 0);
             this.LoadImage('boom', 7, 0);
             this.LoadImage('flag-miss', 8, 0);
+            this.LoadImage('btn-start', 9, 0);
 
             this.LoadImage('digit-1', 1, 1);
             this.LoadImage('digit-2', 2, 1);
@@ -107,9 +108,14 @@ const RES = new class {
         return this.dict.get('brick-glass');
     }
 
+    get BTN_START () {
+        return this.dict.get('btn-start');
+    }
+
     NUMS (n) {
         return this.dict.get(`digit-${n}`);
     }
+
 };
 
 

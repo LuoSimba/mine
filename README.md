@@ -19,6 +19,8 @@ MineSweep of JavaScript
 
 ## changelog
 
+0720 - 重新开始按钮
+
 0627 - 按需执行动画
        游戏结束细节展示
 

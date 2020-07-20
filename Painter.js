@@ -92,6 +92,11 @@ class Painter {
     fill () {
         this.ctx.fill();
     }
+
+    fillRect (x, y, w, h) {
+        //context.strokeRect()
+        this.ctx.fillRect(x, y, w, h);
+    }
 }
 
 

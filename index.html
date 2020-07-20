@@ -25,15 +25,17 @@ body { background: green; margin:0; }
     <script type="text/javascript">
         const SCREEN = new Screen('SCREEN');
 
-
         // game window
         const WIDGET = new Widget;
         const STATUS = new Widget;
+        // btn
+        const BTN_START = new Widget;
+        BTN_START.resize(30, 30);
+        BTN_START.onclick = GameStart;
+        STATUS.addWindow(BTN_START);
 
         SCREEN.addWindow(WIDGET);
         SCREEN.addWindow(STATUS);
-
-        STATUS.onclick = GameStart;
 
         /**
          * 开始游戏
@@ -52,9 +54,14 @@ body { background: green; margin:0; }
         };
 
         window.onload = function () {
-            SCREEN.resize(window.innerWidth, window.innerHeight);
             // 加载图片
             RES.start(GameStart);
+
+            SCREEN.resize(window.innerWidth, window.innerHeight);
+
+            BTN_START.render = (painter) => {
+                painter.drawImage(0, 0, RES.BTN_START);
+            };
         };
     </script>
 </body>

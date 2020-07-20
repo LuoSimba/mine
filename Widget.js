@@ -17,6 +17,8 @@
 
 /**
  * 窗口
+ *
+ * 窗口中可以包含子窗口
  */
 class Widget {
 
@@ -25,11 +27,13 @@ class Widget {
     _w = 300;
     _h = 150;
 
-    onclick = null;
+    children = [];
+
+    onclick       = null;
     oncontextmenu = null;
-    onmousedown = null;
-    onmouseup = null;
-    render = null;
+    onmousedown   = null;
+    onmouseup     = null;
+    render        = null;
 
     get x () { return this._x; }
     get y () { return this._y; }
@@ -50,6 +54,24 @@ class Widget {
         this._w = wid;
         this._h = hgt;
     }
+
+    addWindow (win) {
+
+        this.children.push(win);
+    }
+
+    queryWindow (x, y) {
+
+        for (const sub of this.children) {
+
+            if (sub.x <= x && x < sub.right
+                    && sub.y <= y && y < sub.bottom)
+
+                return sub;
+        }
+
+        return this;
+    }
 }
 
 
@@ -61,12 +83,16 @@ class Widget {
 const Screen = class
 {
 
-    wnds = [];
+    device  = null;
+    ctx     = null;
+    painter = null;
+    wnds    = [];
 
 	constructor (canvasId) {
 
         // 创建画布(屏幕本身就是画布)
 		this.device = document.getElementById(canvasId);
+        this.ctx    = this.device.getContext('2d');
         this.painter = new Painter(this.device);
 
         /**
@@ -162,14 +188,13 @@ const Screen = class
         this.update();
     }
 
-    get ctx () {
-        return this.device.getContext('2d');
-    }
-
     /**
-     * redraw window
+     * redraw all windows
      */
     update () {
+
+        // first clear all
+        this.painter.clearRect(0, 0, this.width, this.height);
 
         for (const win of this.wnds) {
 
@@ -179,6 +204,15 @@ const Screen = class
                 // win.render(this)  --> render = function({painter});
                 win.render(this.painter);
                 this.painter.restore();
+            }
+
+            for (const sub of win.children) {
+                if (sub.render !== null) {
+                    this.painter.save();
+                    this.painter.translate(win.x + sub.x, win.y + sub.y);
+                    sub.render(this.painter);
+                    this.painter.restore();
+                }
             }
         }
     }
@@ -194,8 +228,9 @@ const Screen = class
             if (
                     win.x <= x && x < win.right
                     && win.y <= y && y < win.bottom)
-
-                return win;
+            {
+                return win.queryWindow(x - win.x, y - win.y);
+            }
         }
 
         return null;
