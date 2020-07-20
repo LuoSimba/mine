@@ -23,32 +23,34 @@ const RES = new class {
         };
 
         this.pic.onload = () => {
-            this.LoadImage('mine', 0, 0);
-            this.LoadImage('flag', 1, 0);
-            this.LoadImage('brick', 2, 0);
-            this.LoadImage('brick-reverse', 3, 0);
-            this.LoadImage('ground', 4, 0);
-            this.LoadImage('brick-glass', 5, 0);
-            this.LoadImage('flag-hit', 6, 0);
-            this.LoadImage('boom', 7, 0);
-            this.LoadImage('flag-miss', 8, 0);
-            this.LoadImage('btn-start', 9, 0);
+            this.LoadImage('mine',          1, 1);
+            this.LoadImage('flag',          1, 2);
+            this.LoadImage('brick',         1, 3);
+            this.LoadImage('brick-reverse', 1, 4);
+            this.LoadImage('ground',        1, 5);
+            this.LoadImage('brick-glass',   1, 6);
+            this.LoadImage('flag-hit',      1, 7);
+            this.LoadImage('boom',          1, 8);
+            this.LoadImage('flag-miss',     1, 9);
+            this.LoadImage('btn-start',     1,10);
 
-            this.LoadImage('digit-1', 1, 1);
-            this.LoadImage('digit-2', 2, 1);
-            this.LoadImage('digit-3', 3, 1);
-            this.LoadImage('digit-4', 4, 1);
-            this.LoadImage('digit-5', 5, 1);
-            this.LoadImage('digit-6', 6, 1);
-            this.LoadImage('digit-7', 7, 1);
-            this.LoadImage('digit-8', 8, 1);
+            this.LoadImage('digit-1', 2, 2);
+            this.LoadImage('digit-2', 2, 3);
+            this.LoadImage('digit-3', 2, 4);
+            this.LoadImage('digit-4', 2, 5);
+            this.LoadImage('digit-5', 2, 6);
+            this.LoadImage('digit-6', 2, 7);
+            this.LoadImage('digit-7', 2, 8);
+            this.LoadImage('digit-8', 2, 9);
+
+            this.LoadImage('ask',   3, 2);
 
             if (this.onload !== null)
                 this.onload();
         };
     }
 
-    LoadImage (key, x, y) {
+    LoadImage (key, row, column) {
 
         const device = new OffscreenCanvas(BOX_SIZE, BOX_SIZE);
 
@@ -59,7 +61,7 @@ const RES = new class {
         ctx.drawImage(
             this.pic,
             // src
-            x * BOX_SIZE, y * BOX_SIZE, BOX_SIZE, BOX_SIZE,
+            (column -1) * BOX_SIZE, (row -1) * BOX_SIZE, BOX_SIZE, BOX_SIZE,
             // dst
             0, 0, BOX_SIZE, BOX_SIZE
         );
