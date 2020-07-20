@@ -51,33 +51,52 @@ class Painter {
     rect (x, y, w, h) {
         this.ctx.rect(x, y, w, h);
     }
+
+    /**
+     * 擦除图像
+     */
+    clearRect (x, y, w, h) {
+        this.ctx.clearRect(x, y, w, h);
+        //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    }
+
+    /**
+     * 在画布上贴图
+     *
+     * img 可以是另一个<canvas>
+     */
+    drawImage (x, y, img) {
+        this.ctx.drawImage(img, x, y);
+    }
+
+    drawText (x, y, str) {
+        this.ctx.fillText(str, x, y);// see context.strokeText()
+    }
+
+    translate (x, y) {
+        this.ctx.translate(x, y);
+    }
+
+    save () {
+        this.ctx.save();
+    }
+
+    restore () {
+        this.ctx.restore();
+    }
+
+    stroke () {
+        this.ctx.stroke();
+    }
+
+    fill () {
+        this.ctx.fill();
+    }
 }
 
 
-/**
- * 擦除图像
- */
-Painter.prototype.clearRect = function (x, y, w, h) {
-    this.ctx.clearRect(x, y, w, h);
-    //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-};
 
-/**
- * 在画布上贴图
- *
- * img 可以是另一个<canvas>
- */
-Painter.prototype.drawImage = function (x, y, img) {
-    this.ctx.drawImage(img, x, y);
-};
 
-Painter.prototype.drawText = function (x, y, str) {
-    this.ctx.fillText(str, x, y);// see context.strokeText()
-};
-
-Painter.prototype.translate = function (x, y) {
-    this.ctx.translate(x, y);
-};
 
 /**
  * bold 参数设置了缺省值
@@ -91,25 +110,9 @@ Painter.prototype.setFont = function (fontName, fontSize, bold = false) {
     this.ctx.font = `${boldexpr} ${fontSize}px ${fontName}`;
 };
 
-Painter.prototype.save = function () {
-    this.ctx.save();
-};
-
-Painter.prototype.restore = function () {
-    this.ctx.restore();
-};
-
 // closePath
 Painter.prototype.beginPath = function () {
     this.ctx.beginPath();
-};
-
-Painter.prototype.stroke = function () {
-    this.ctx.stroke();
-};
-
-Painter.prototype.fill = function () {
-    this.ctx.fill();
 };
 
 Painter.prototype.circle = function (x, y, radius) {
