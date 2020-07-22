@@ -12,23 +12,24 @@ body { background: green; margin:0; }
 <script type="text/javascript" src="Util.js"></script>
 <script type="text/javascript" src="Movie.js"></script>
 <script type="text/javascript" src="Painter.js"></script>
-<script type="text/javascript" src="Widget.js"></script>
 <script type="text/javascript" src="MineResource.js"></script>
 <script type="text/javascript" src="MineBlock.js"></script>
 <script type="text/javascript" src="MineBattleground.js"></script>
-<script type="text/javascript" src="MineSweeper.js"></script>
 </head>
 
 <body>
     <canvas id="SCREEN"></canvas>
 
     <script type="text/javascript" src="screen.js"></script>
-
+    <script type="text/javascript" src="Widget.js"></script>
     <script type="text/javascript">
 
         // game window
         const WIDGET = new Widget;
         const STATUS = new Widget;
+    </script>
+    <script type="text/javascript" src="MineSweeper.js"></script>
+    <script type="text/javascript">
         // btn
         const BTN_START = new Widget;
         BTN_START.resize(30, 30);

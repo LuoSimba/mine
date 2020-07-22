@@ -33,6 +33,52 @@ class HotSpot {
 }
 
 
+// 因为游戏的实例只能运行一份
+// （只有一份屏幕，只有一份 STATUS，WIDGET 窗口）
+// 所以 MineSweeper 类只会创建一次，相当于单例模式
+// 所以类属性可以直接拿出来作为全局变量。
+
+/**
+ * 当前存在的地雷数
+ */
+let gMineCount = 0;
+/**
+ * 当前已用的红旗数
+ */
+let gFlagsCount = 0;
+/**
+ * 有效的红旗数
+ */
+let gFlagsCountYes = 0;
+/**
+ * 剩余未清除砖块数量
+ */
+let gUncleanBricks = 0;
+let gGameStatus = MINEST_PENDING;
+
+/**
+ * whether game is over
+ */
+function isGameOver () {
+    return gGameStatus === MINEST_OVER;
+}
+
+
+STATUS.render = function (painter) {
+    // 剩余可用红旗数
+    const flagsLeft = gMineCount - gFlagsCount;
+
+    painter.setBrush(COLOR_WINDOW_BG);
+    painter.fillRect(-2, -2, STATUS.width + 4, STATUS.height + 4);
+
+    painter.setFont('compact', 20, true);
+    painter.setBrush('black');
+    // Template String
+    painter.drawText(10, 30, `${flagsLeft}`);
+};
+
+
+
 /**
  * usage:
  *
@@ -40,16 +86,11 @@ class HotSpot {
  * map.resetMines(num);
  * map.ready();
  *
- * use `map.isGameOver()' to check whether game is over
+ * use `isGameOver()' to check whether game is over
  */
 class MineSweeper {
 
     // state
-    mineCount = 0;     // 当前存在的地雷数
-    flagsCount = 0;    // 当前已用的红旗数
-    flagsCountYes = 0; // 有效红旗数
-    uncleanBricks = 0; // 剩余未清除砖块数量
-    _status = MINEST_PENDING;
     _bg = null;
     _dev_gnd = null;
     _hot = new HotSpot;
@@ -61,7 +102,7 @@ class MineSweeper {
     // bind(this) to current 'this' symbol
     _slot_mousedown = (x, y) => {
 
-        if (this.isGameOver())
+        if (isGameOver())
             return;
 
         x = Math.floor(x / BOX_SIZE);
@@ -76,7 +117,7 @@ class MineSweeper {
      */
     _slot_mouseup = (x, y) => {
 
-        if (this.isGameOver())
+        if (isGameOver())
             return;
 
         x = Math.floor(x / BOX_SIZE);
@@ -90,7 +131,7 @@ class MineSweeper {
      * 右键放置红旗
      */
     _slot_contextmenu = (x, y) => {
-        if (this.isGameOver())
+        if (isGameOver())
             return;
 
         x = Math.floor(x / BOX_SIZE);
@@ -111,7 +152,7 @@ class MineSweeper {
      * 翻开砖块
      */
     _click (x, y) {
-        if (this.isGameOver())
+        if (isGameOver())
             return;
 
         x = Math.floor(x / BOX_SIZE);
@@ -212,20 +253,6 @@ class MineSweeper {
     };
 
 
-    _render_status = (painter) => {
-        // 剩余可用红旗数
-        const flagsLeft = this.mineCount - this.flagsCount;
-
-        painter.setBrush(COLOR_WINDOW_BG);
-        painter.fillRect(-2, -2, STATUS.width + 4, STATUS.height + 4);
-
-        painter.setFont('Monospace', 12, false);
-        painter.setBrush('black');
-        // Template String
-        painter.drawText(10, 30, `FLAG:${flagsLeft}`);
-    };
-
-
     constructor (wid, hgt) {
         this._bg = new MineBattleground(wid, hgt);
         this._dev_gnd = new OffscreenCanvas(wid * BOX_SIZE, hgt * BOX_SIZE);
@@ -235,7 +262,6 @@ class MineSweeper {
         WIDGET.onmousedown   = this._slot_mousedown;
         WIDGET.onmouseup     = this._slot_mouseup;
 
-        STATUS.render = this._render_status;
     }
 
     get width () {
@@ -261,13 +287,6 @@ class MineSweeper {
             throw MINE_INVALID_POS;
 
         return this._bg.getBlock(x, y);
-    }
-
-    /**
-     * whether game is over
-     */
-    isGameOver () {
-        return this._status === MINEST_OVER;
     }
 
     /**
@@ -331,7 +350,7 @@ class MineSweeper {
     // 不再使用 Uint8Array(w, h), ArrayBuffer 作为数据存储
     resetMines (max) {
 
-        this._status = MINEST_PENDING;
+        gGameStatus = MINEST_PENDING;
 
         if (max > this._bg.size)
             throw MINE_LOGIC_ERROR;
@@ -345,11 +364,11 @@ class MineSweeper {
         // dict.has();
         // dict.add();
 
-        this.mineCount = max;
-        this.flagsCount = 0;
-        this.flagsCountYes = 0;
-        this.uncleanBricks = this._bg.size;
-        this._status = MINEST_START;
+        gMineCount = max;
+        gFlagsCount = 0;
+        gFlagsCountYes = 0;
+        gUncleanBricks = this._bg.size;
+        gGameStatus = MINEST_START;
     }
 
     // init ground ui
@@ -414,7 +433,7 @@ class MineSweeper {
             return;
 
         block.clearBrick();
-        this.uncleanBricks --;
+        gUncleanBricks --;
         this.refresh();
 
         // see what's under the brick
@@ -423,7 +442,7 @@ class MineSweeper {
         {
             const p = new Painter(this.GROUND);
             p.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.BOOM);
-            this._status = MINEST_OVER;
+            gGameStatus = MINEST_OVER;
             throw MINE_GAME_OVER;
         }
         else if (block.num === 0) // isEmpty?
@@ -471,19 +490,19 @@ class MineSweeper {
         if (block.isFlag) 
         {
             block.clearFlag();
-            this.flagsCount --;
+            gFlagsCount --;
 
             if (block.isMine)
-                this.flagsCountYes --;
+                gFlagsCountYes --;
         }
         // 红旗数量是有限资源，不能超过地雷数量
-        else if (this.flagsCount < this.mineCount)
+        else if (gFlagsCount < gMineCount)
         {
             block.setFlag();
-            this.flagsCount ++;
+            gFlagsCount ++;
 
             if (block.isMine) {
-                this.flagsCountYes ++;
+                gFlagsCountYes ++;
 
                 this.checkSuccess(); // throw
             }
@@ -501,9 +520,9 @@ class MineSweeper {
      * throw
      */
     checkSuccess () {
-        if (this.flagsCountYes === this.mineCount)
+        if (gFlagsCountYes === gMineCount)
         {
-            this._status = MINEST_OVER;
+            gGameStatus = MINEST_OVER;
             throw MINE_GAME_OVER;
         }
     }
