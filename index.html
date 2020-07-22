@@ -27,38 +27,20 @@ body { background: green; margin:0; }
         // game window
         const WIDGET = new Widget;
         const STATUS = new Widget;
-    </script>
-    <script type="text/javascript" src="MineSweeper.js"></script>
-    <script type="text/javascript">
         // btn
         const BTN_START = new Widget;
         BTN_START.resize(30, 30);
-        BTN_START.onclick = GameStart;
         STATUS.addWindow(BTN_START);
 
         SCREEN.addWindow(WIDGET);
         SCREEN.addWindow(STATUS);
+    </script>
 
-        /**
-         * 开始游戏
-         */
-        function GameStart () {
-            game.resetMines(99);
-            game.ready();
-            Refresh();
-        }
+    <script type="text/javascript" src="MineSweeper.js"></script>
 
-        const game = new MineSweeper(30, 16);
-
-
-        window.onload = function () {
-            // 加载图片
-            RES.start(GameStart);
-
-            BTN_START.render = (painter) => {
-                painter.drawImage(0, 0, RES.BTN_START);
-            };
-        };
+    <script type="text/javascript">
+        // 加载图片, 开始游戏
+        RES.start(GameStart);
     </script>
 </body>
 </html>
