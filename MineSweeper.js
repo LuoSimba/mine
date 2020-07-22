@@ -72,6 +72,27 @@ const HOT = new class {
     x = 0;
     y = 0;
     type = null;
+
+    clear () {
+        this.type = null;
+    }
+
+    setPosition (x, y) {
+        if (!GROUND.isValid(x, y)) return;
+
+        this.x = x;
+        this.y = y;
+
+        const block = GROUND.getBlock(x, y);
+
+        if (block.isFlag) {
+            // do nothing
+        } else if (block.isBrick) {
+            // do nothing
+        } else if (block.num > 0) {
+            this.type = 'NUM';
+        }
+    }
 };
 
 
@@ -115,7 +136,7 @@ class MineSweeper {
         x = Math.floor(x / BOX_SIZE);
         y = Math.floor(y / BOX_SIZE);
 
-        this.setHot(x, y);
+        HOT.setPosition(x, y);
         Refresh();
     };
 
@@ -130,7 +151,7 @@ class MineSweeper {
         x = Math.floor(x / BOX_SIZE);
         y = Math.floor(y / BOX_SIZE);
 
-        this.clearHot();
+        HOT.clear();
         Refresh();
     };
 
@@ -200,8 +221,8 @@ class MineSweeper {
         painter.fillRect(-2, -2, WIDGET.width + 4, WIDGET.height + 4);
         painter.drawImage(0, 0, GROUND.IMAGE);
 
-        for (let y = 0; y < GROUND.height; y ++) {
-            for (let x = 0; x < GROUND.width; x ++) {
+        for (let y = 0; y < GROUND.rows; y ++) {
+            for (let x = 0; x < GROUND.cols; x ++) {
 
                 const block = GROUND.getBlock(x, y);
 
@@ -215,7 +236,7 @@ class MineSweeper {
 
         if (HOT.type === 'NUM') {
 
-            const surrounds = this.surroundPositions(HOT.x, HOT.y);
+            const surrounds = GROUND.surroundPositions(HOT.x, HOT.y);
 
             for (const [x, y] of surrounds) {
 
@@ -237,8 +258,8 @@ class MineSweeper {
         painter.fillRect(-2, -2, WIDGET.width + 4, WIDGET.height + 4);
         painter.drawImage(0, 0, GROUND.IMAGE);
 
-        for (let y = 0; y < GROUND.height; y ++) {
-            for (let x = 0; x < GROUND.width; x ++) {
+        for (let y = 0; y < GROUND.rows; y ++) {
+            for (let x = 0; x < GROUND.cols; x ++) {
 
                 const block = GROUND.getBlock(x, y);
 
@@ -267,7 +288,6 @@ class MineSweeper {
         WIDGET.oncontextmenu = this._slot_contextmenu;
         WIDGET.onmousedown   = this._slot_mousedown;
         WIDGET.onmouseup     = this._slot_mouseup;
-
     }
 
     /**
@@ -357,8 +377,8 @@ class MineSweeper {
 
         const painter = new Painter(GROUND.IMAGE);
 
-        for (let j = 0; j < GROUND.height; j ++) {
-            for (let i = 0; i < GROUND.width; i ++) {
+        for (let j = 0; j < GROUND.rows; j ++) {
+            for (let i = 0; i < GROUND.cols; i ++) {
 
                 const block = GROUND.getBlock(i, j);
 
@@ -376,11 +396,11 @@ class MineSweeper {
         }
 
         STATUS.move(15, 15);
-        STATUS.resize(GROUND.width * BOX_SIZE, 40);
+        STATUS.resize(GROUND.width, 40);
         BTN_START.move(STATUS.width/2-15, 5);
 
         WIDGET.move(15, 15 + 50);
-        WIDGET.resize(GROUND.width * BOX_SIZE, GROUND.height * BOX_SIZE);
+        WIDGET.resize(GROUND.width, GROUND.height);
         WIDGET.render = this._render_main;
     }
 
@@ -501,37 +521,6 @@ class MineSweeper {
         {
             gGameStatus = MINEST_OVER;
             throw MINE_GAME_OVER;
-        }
-    }
-
-    surroundPositions (x, y) {
-        return GROUND.surroundPositions(x, y);
-    }
-
-    clearHot () {
-        HOT.type = null;
-    }
-
-    setHot (x, y) {
-        if (!GROUND.isValid(x, y))
-            return;
-
-        HOT.x = x;
-        HOT.y = y;
-
-        const block = GROUND.getBlock(x, y);
-
-        if (block.isFlag)
-        {
-            // do nothing
-        }
-        else if (block.isBrick)
-        {
-            // do nothing
-        }
-        else if (block.num > 0)
-        {
-            HOT.type = 'NUM';
         }
     }
 

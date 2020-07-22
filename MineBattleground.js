@@ -56,9 +56,9 @@ class MineBattleground {
         }
 
         // 在地雷周围标上数值
-        for (let j = 0; j < this.height; j ++)
+        for (let j = 0; j < this.rows; j ++)
         {
-            for (let i = 0; i < this.width; i ++)
+            for (let i = 0; i < this.cols; i ++)
             {
                 // 更新周围的数值
                 if (this.getBlock(i, j).isMine)
@@ -76,17 +76,11 @@ class MineBattleground {
         }
     }
 
-    get width () {
-        return this._wid;
-    }
-
-    get height () {
-        return this._hgt;
-    }
-
-    get size () {
-        return this.width * this.height;
-    }
+    get cols () { return this._wid; }
+    get rows () { return this._hgt; }
+    get size () { return this.cols * this.rows; }
+    get width  () { return this.cols * BOX_SIZE; }
+    get height () { return this.rows * BOX_SIZE; }
 
     /**
      * return MineBlock, throw symbol
@@ -96,7 +90,7 @@ class MineBattleground {
         if (!this.isValid(x, y))
             throw MINE_INVALID_POS;
 
-        return this._data[ this.width * y + x ];
+        return this._data[ this.cols * y + x ];
     }
 
     ready () {
@@ -114,8 +108,8 @@ class MineBattleground {
      * is position valid?
      */
     isValid (x, y) {
-        return ( x >= 0 && x < this.width)
-            && (y >= 0 && y < this.height);
+        return ( x >= 0 && x < this.cols)
+            && (y >= 0 && y < this.rows);
     }
 
     /**
