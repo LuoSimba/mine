@@ -5,10 +5,6 @@
  */
 const MINE_GAME_OVER   = Symbol('game over');
 /**
- * 使用了非法坐标
- */
-const MINE_INVALID_POS = Symbol('invalid position');
-/**
  * 其他逻辑错误，违反规定操作
  *
  * 比如：
@@ -25,12 +21,6 @@ const MINEST_OVER    = Symbol('status game over');
 
 const COLOR_WINDOW_BG = 'hsl(0, 0%, 100%, .5)';
 
-
-class HotSpot {
-    x = 0;
-    y = 0;
-    type = null;
-}
 
 
 // 因为游戏的实例只能运行一份
@@ -56,12 +46,33 @@ let gFlagsCountYes = 0;
 let gUncleanBricks = 0;
 let gGameStatus = MINEST_PENDING;
 
+let GROUND = new MineBattleground(1, 1);
+
+
+
 /**
  * whether game is over
  */
 function isGameOver () {
     return gGameStatus === MINEST_OVER;
 }
+
+/**
+ * 更新 UI 界面
+ */
+function Refresh () {
+
+    window.requestAnimationFrame(function () {
+        SCREEN.update();
+    });
+}
+
+
+const HOT = new class {
+    x = 0;
+    y = 0;
+    type = null;
+};
 
 
 STATUS.render = function (painter) {
@@ -90,10 +101,6 @@ STATUS.render = function (painter) {
  */
 class MineSweeper {
 
-    // state
-    _bg = null;
-    _dev_gnd = null;
-    _hot = new HotSpot;
 
     /**
      * 鼠标左键按下时，记录坐标和类型
@@ -109,7 +116,7 @@ class MineSweeper {
         y = Math.floor(y / BOX_SIZE);
 
         this.setHot(x, y);
-        this.refresh();
+        Refresh();
     };
 
     /**
@@ -124,7 +131,7 @@ class MineSweeper {
         y = Math.floor(y / BOX_SIZE);
 
         this.clearHot();
-        this.refresh();
+        Refresh();
     };
 
     /**
@@ -159,7 +166,7 @@ class MineSweeper {
         y = Math.floor(y / BOX_SIZE);
 
         try {
-            const block = this.seek(x, y);
+            const block = GROUND.getBlock(x, y);
 
             if (block.isFlag)
             {
@@ -191,12 +198,12 @@ class MineSweeper {
         // 底图
         painter.setBrush(COLOR_WINDOW_BG);
         painter.fillRect(-2, -2, WIDGET.width + 4, WIDGET.height + 4);
-        painter.drawImage(0, 0, this.GROUND);
+        painter.drawImage(0, 0, GROUND.IMAGE);
 
-        for (let y = 0; y < this.height; y ++) {
-            for (let x = 0; x < this.width; x ++) {
+        for (let y = 0; y < GROUND.height; y ++) {
+            for (let x = 0; x < GROUND.width; x ++) {
 
-                const block = this.seek(x, y);
+                const block = GROUND.getBlock(x, y);
 
                 if (block.isBrick)
                     painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.BRICK);
@@ -206,13 +213,13 @@ class MineSweeper {
             }
         }
 
-        if (this.HOT.type === 'NUM') {
+        if (HOT.type === 'NUM') {
 
-            const surrounds = this.surroundPositions(this.HOT.x, this.HOT.y);
+            const surrounds = this.surroundPositions(HOT.x, HOT.y);
 
             for (const [x, y] of surrounds) {
 
-                const sr = this.seek(x, y);
+                const sr = GROUND.getBlock(x, y);
 
                 if (!sr.isFlag && sr.isBrick)
                     painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.BRICK_REVERSE);
@@ -228,12 +235,12 @@ class MineSweeper {
         // 底图
         painter.setBrush(COLOR_WINDOW_BG);
         painter.fillRect(-2, -2, WIDGET.width + 4, WIDGET.height + 4);
-        painter.drawImage(0, 0, this.GROUND);
+        painter.drawImage(0, 0, GROUND.IMAGE);
 
-        for (let y = 0; y < this.height; y ++) {
-            for (let x = 0; x < this.width; x ++) {
+        for (let y = 0; y < GROUND.height; y ++) {
+            for (let x = 0; x < GROUND.width; x ++) {
 
-                const block = this.seek(x, y);
+                const block = GROUND.getBlock(x, y);
 
                 // 判断红旗是否正确
                 if (block.isFlag) {
@@ -254,39 +261,13 @@ class MineSweeper {
 
 
     constructor (wid, hgt) {
-        this._bg = new MineBattleground(wid, hgt);
-        this._dev_gnd = new OffscreenCanvas(wid * BOX_SIZE, hgt * BOX_SIZE);
+        GROUND = new MineBattleground(wid, hgt);
 
         WIDGET.onclick       = this._slot_click2;
         WIDGET.oncontextmenu = this._slot_contextmenu;
         WIDGET.onmousedown   = this._slot_mousedown;
         WIDGET.onmouseup     = this._slot_mouseup;
 
-    }
-
-    get width () {
-        return this._bg.width;
-    }
-
-    get height () {
-        return this._bg.height;
-    }
-
-    get GROUND () {
-        return this._dev_gnd;
-    }
-
-    /**
-     * get MineBlock of 当前定位
-     *
-     * return MineBlock, throw symbol
-     */
-    seek (x, y) {
-
-        if (!this.IsValid(x, y))
-            throw MINE_INVALID_POS;
-
-        return this._bg.getBlock(x, y);
     }
 
     /**
@@ -298,18 +279,18 @@ class MineSweeper {
      */
     clearNearby (x, y) {
 
-        const block = this._bg.getBlock(x, y);
+        const block = GROUND.getBlock(x, y);
 
         if (block.isFlag || block.isBrick || block.num <= 0)
             return;
 
-        const nearby = this._bg.surroundPositions(x, y);
+        const nearby = GROUND.surroundPositions(x, y);
 
         // 建立 nearby 与 list 的映射关系
         const list = nearby.map(
             ([x, y]) => {
                 return (
-                    this._bg.getBlock(x, y).isFlag
+                    GROUND.getBlock(x, y).isFlag
                     ) ? 1 : 0
             }
         );
@@ -352,11 +333,11 @@ class MineSweeper {
 
         gGameStatus = MINEST_PENDING;
 
-        if (max > this._bg.size)
+        if (max > GROUND.size)
             throw MINE_LOGIC_ERROR;
 
-        this._bg.placeMines(max);
-        this._bg.ready();
+        GROUND.placeMines(max);
+        GROUND.ready();
 
 
         // ECMA 23.2 Set Object
@@ -367,19 +348,19 @@ class MineSweeper {
         gMineCount = max;
         gFlagsCount = 0;
         gFlagsCountYes = 0;
-        gUncleanBricks = this._bg.size;
+        gUncleanBricks = GROUND.size;
         gGameStatus = MINEST_START;
     }
 
     // init ground ui
     ready () {
 
-        const painter = new Painter(this.GROUND);
+        const painter = new Painter(GROUND.IMAGE);
 
-        for (let j = 0; j < this.height; j ++) {
-            for (let i = 0; i < this.width; i ++) {
+        for (let j = 0; j < GROUND.height; j ++) {
+            for (let i = 0; i < GROUND.width; i ++) {
 
-                const block = this.seek(i, j);
+                const block = GROUND.getBlock(i, j);
 
                 // draw ground.
                 painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, RES.GROUND);
@@ -395,17 +376,13 @@ class MineSweeper {
         }
 
         STATUS.move(15, 15);
-        STATUS.resize(this.width * BOX_SIZE, 40);
+        STATUS.resize(GROUND.width * BOX_SIZE, 40);
         BTN_START.move(STATUS.width/2-15, 5);
 
         WIDGET.move(15, 15 + 50);
-        WIDGET.resize(this.width * BOX_SIZE, this.height * BOX_SIZE);
+        WIDGET.resize(GROUND.width * BOX_SIZE, GROUND.height * BOX_SIZE);
         WIDGET.render = this._render_main;
     }
-
-	IsValid (x, y) {
-        return this._bg.isValid(x, y);
-	}
 
     /**
      * 清除砖块
@@ -421,10 +398,10 @@ class MineSweeper {
      */
     clearBrick (x, y) {
 
-        if (!this.IsValid(x, y))
+        if (!GROUND.isValid(x, y))
             return;
 
-        const block = this._bg.getBlock(x, y);
+        const block = GROUND.getBlock(x, y);
 
         if (block.isFlag)
             return;
@@ -434,13 +411,13 @@ class MineSweeper {
 
         block.clearBrick();
         gUncleanBricks --;
-        this.refresh();
+        Refresh();
 
         // see what's under the brick
         // isMine? then you are dead
         if (block.isMine)
         {
-            const p = new Painter(this.GROUND);
+            const p = new Painter(GROUND.IMAGE);
             p.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.BOOM);
             gGameStatus = MINEST_OVER;
             throw MINE_GAME_OVER;
@@ -479,10 +456,10 @@ class MineSweeper {
      */
     toggleFlag (x, y) {
 
-        if (!this.IsValid(x,y))
+        if (!GROUND.isValid(x,y))
             return;
 
-        const block = this._bg.getBlock(x, y);
+        const block = GROUND.getBlock(x, y);
 
         if (!block.isBrick)
             return;
@@ -508,7 +485,7 @@ class MineSweeper {
             }
         }
 
-        this.refresh();
+        Refresh();
     }
 
     /**
@@ -528,35 +505,21 @@ class MineSweeper {
     }
 
     surroundPositions (x, y) {
-        return this._bg.surroundPositions(x, y);
-    }
-
-    /**
-     * 更新 UI 界面
-     */
-    refresh () {
-
-        window.requestAnimationFrame(() => {
-            SCREEN.update();
-        });
-    }
-
-    get HOT () {
-        return this._hot;
+        return GROUND.surroundPositions(x, y);
     }
 
     clearHot () {
-        this.HOT.type = null;
+        HOT.type = null;
     }
 
     setHot (x, y) {
-        if (!this.IsValid(x, y))
+        if (!GROUND.isValid(x, y))
             return;
 
-        this.HOT.x = x;
-        this.HOT.y = y;
+        HOT.x = x;
+        HOT.y = y;
 
-        const block = this.seek(x, y);
+        const block = GROUND.getBlock(x, y);
 
         if (block.isFlag)
         {
@@ -568,7 +531,7 @@ class MineSweeper {
         }
         else if (block.num > 0)
         {
-            this.HOT.type = 'NUM';
+            HOT.type = 'NUM';
         }
     }
 
@@ -577,7 +540,7 @@ class MineSweeper {
         switch (e) {
             case MINE_GAME_OVER:
                 WIDGET.render = this._render_main_gg;
-                this.refresh();
+                Refresh();
                 break;
             case MINE_INVALID_POS:
                 alert('坐标超出范围');

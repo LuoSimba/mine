@@ -1,4 +1,8 @@
 
+/**
+ * 使用了非法坐标
+ */
+const MINE_INVALID_POS = Symbol('invalid position');
 
 
 class MineBattleground {
@@ -6,6 +10,7 @@ class MineBattleground {
     _wid = 0;
     _hgt = 0;
     _data = [];
+    IMAGE = null;
 
     constructor (wid, hgt) {
 
@@ -15,6 +20,10 @@ class MineBattleground {
 
         for (let i = 0; i < this.size; i ++)
             this._data.push(new MineBlock);
+
+        this.IMAGE = new OffscreenCanvas(
+                wid * BOX_SIZE,
+                hgt * BOX_SIZE);
     }
 
     clearAll () {
@@ -79,12 +88,15 @@ class MineBattleground {
         return this.width * this.height;
     }
 
+    /**
+     * return MineBlock, throw symbol
+     */
     getBlock (x, y) {
 
-        if (this.isValid(x, y))
-            return this._data[ this.width * y + x ];
-        else
-            throw new Error('invalid position');
+        if (!this.isValid(x, y))
+            throw MINE_INVALID_POS;
+
+        return this._data[ this.width * y + x ];
     }
 
     ready () {
