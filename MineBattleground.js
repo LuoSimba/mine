@@ -1,10 +1,4 @@
 
-/**
- * 使用了非法坐标
- */
-const MINE_INVALID_POS = Symbol('invalid position');
-
-
 class MineBattleground {
 
     _wid = 0;
@@ -88,7 +82,7 @@ class MineBattleground {
     getBlock (x, y) {
 
         if (!this.isValid(x, y))
-            throw MINE_INVALID_POS;
+            throw new Error('坐标超出范围');
 
         return this._data[ this.cols * y + x ];
     }
@@ -107,10 +101,10 @@ class MineBattleground {
         const painter = new Painter(this.IMAGE);
 
         // 只需要绘制底图，不必绘制砖块和红旗
-        for (let j = 0; j < GROUND.rows; j ++) {
-            for (let i = 0; i < GROUND.cols; i ++) {
+        for (let j = 0; j < this.rows; j ++) {
+            for (let i = 0; i < this.cols; i ++) {
 
-                const block = GROUND.getBlock(i, j);
+                const block = this.getBlock(i, j);
 
                 // draw ground.
                 painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, RES.GROUND);

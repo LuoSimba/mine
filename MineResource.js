@@ -32,7 +32,6 @@ const RES = new class {
             this.LoadImage('flag-hit',      1, 7);
             this.LoadImage('boom',          1, 8);
             this.LoadImage('flag-miss',     1, 9);
-            this.LoadImage('btn-start',     1,10);
 
             this.LoadImage('digit-1', 2, 2);
             this.LoadImage('digit-2', 2, 3);
@@ -44,6 +43,10 @@ const RES = new class {
             this.LoadImage('digit-8', 2, 9);
 
             this.LoadImage('ask',   3, 2);
+
+            this.LoadImage('btn-start',      4,1);
+            this.LoadImage('btn-start-smile',4,2);
+            this.LoadImage('btn-start-cry',  4,3);
 
             if (this.onload !== null)
                 this.onload();
@@ -112,6 +115,14 @@ const RES = new class {
 
     get BTN_START () {
         return this.dict.get('btn-start');
+    }
+
+    get BTN_START_SMILE () {
+        return this.dict.get('btn-start-smile');
+    }
+
+    get BTN_START_CRY () {
+        return this.dict.get('btn-start-cry');
     }
 
     NUMS (n) {

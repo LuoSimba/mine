@@ -9,13 +9,14 @@
 /**
  * 游戏结束，无论成功或失败。
  */
-const MINE_GAME_OVER   = Symbol('game over');
+const MINE_GAME_OVER = Symbol('game over');
 /**
  * 游戏状态
  */
 const MINEST_PENDING = Symbol('status pending');
 const MINEST_START   = Symbol('status game start');
-const MINEST_OVER    = Symbol('status game over');
+const MINEST_WIN     = Symbol('status game over: win');
+const MINEST_LOSE    = Symbol('status game over: failure');
 
 const COLOR_WINDOW_BG = 'hsl(0, 0%, 100%, .5)';
 
@@ -84,7 +85,7 @@ const HOT = new class {
  * used to check whether game is over
  */
 function isGameOver () {
-    return gGameStatus === MINEST_OVER;
+    return gGameStatus === MINEST_LOSE || gGameStatus === MINEST_WIN;
 }
 
 /**
@@ -196,8 +197,8 @@ function ClearBrick (x, y) {
     {
         const p = new Painter(GROUND.IMAGE);
         p.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.BOOM);
-        gGameStatus = MINEST_OVER;
-        throw MINE_GAME_OVER;
+        gGameStatus = MINEST_LOSE;
+        throw MINE_GAME_OVER; // 踩到地雷引起游戏结束
     }
     else if (block.num === 0) // isEmpty?
     {
@@ -316,27 +317,26 @@ function ToggleFlag (x, y) {
 function CheckSuccess () {
 
     if (gFlagsCountYes === gMineCount) {
-        gGameStatus = MINEST_OVER;
-        throw MINE_GAME_OVER;
+        gGameStatus = MINEST_WIN;
+        throw MINE_GAME_OVER; // 指出了所有地雷位置，游戏胜利
     }
 }
 
 
 function GameException (e) {
 
-    switch (e) {
-        case MINE_GAME_OVER:
-            Refresh();
-            break;
-        case MINE_INVALID_POS:
-            alert('坐标超出范围');
-            throw e;
-        default:
-            if (e instanceof Error) {
-                alert(e.message);
-            }
-            throw e;
+    // 游戏结束
+    // 游戏结束不是一个错误
+    if (e === MINE_GAME_OVER) {
+        Refresh();
+        return;
     }
+
+    if (e instanceof Error) {
+        alert(e.message);
+    }
+
+    throw e;
 }
 
 
@@ -360,7 +360,19 @@ STATUS.render = function (painter) {
 };
 
 BTN_START.render = function (painter) {
-    painter.drawImage(0, 0, RES.BTN_START);
+
+    if (gGameStatus === MINEST_WIN)
+    {
+        painter.drawImage(0, 0, RES.BTN_START_SMILE);
+    }
+    else if (gGameStatus === MINEST_LOSE)
+    {
+        painter.drawImage(0, 0, RES.BTN_START_CRY);
+    }
+    else
+    {
+        painter.drawImage(0, 0, RES.BTN_START);
+    }
 };
 
 /**
