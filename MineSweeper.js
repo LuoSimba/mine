@@ -2,6 +2,10 @@
     // ArrowFunction
     // bind(this) to current 'this' symbol
 
+// ================================================
+// 常量
+// ================================================
+
 /**
  * 游戏结束，无论成功或失败。
  */
@@ -24,6 +28,9 @@ const MINEST_OVER    = Symbol('status game over');
 const COLOR_WINDOW_BG = 'hsl(0, 0%, 100%, .5)';
 
 
+// ================================================
+// 全局变量，游戏运行数据
+// ================================================
 
 // 因为游戏的实例只能运行一份
 // （只有一份屏幕，只有一份 STATUS，WIDGET 窗口）
@@ -50,7 +57,36 @@ let gGameStatus = MINEST_PENDING;
 
 const GROUND = new MineBattleground(30, 16);
 
+const HOT = new class {
+    x = 0;
+    y = 0;
+    type = null;
 
+    clear () {
+        this.type = null;
+    }
+
+    setPosition (x, y) {
+        if (!GROUND.isValid(x, y)) return;
+
+        this.x = x;
+        this.y = y;
+
+        const block = GROUND.getBlock(x, y);
+
+        if (block.isFlag) {
+            // do nothing
+        } else if (block.isBrick) {
+            // do nothing
+        } else if (block.num > 0) {
+            this.type = 'NUM';
+        }
+    }
+};
+
+// ================================================
+// 动作
+// ================================================
 
 /**
  * used to check whether game is over
@@ -138,7 +174,6 @@ function GameReady () {
 
     WIDGET.move(15, 15 + 50);
     WIDGET.resize(GROUND.width, GROUND.height);
-    WIDGET.render = RenderFunc_Main;
 }
 
 /**
@@ -312,38 +347,10 @@ function CheckSuccess () {
 }
 
 
-const HOT = new class {
-    x = 0;
-    y = 0;
-    type = null;
-
-    clear () {
-        this.type = null;
-    }
-
-    setPosition (x, y) {
-        if (!GROUND.isValid(x, y)) return;
-
-        this.x = x;
-        this.y = y;
-
-        const block = GROUND.getBlock(x, y);
-
-        if (block.isFlag) {
-            // do nothing
-        } else if (block.isBrick) {
-            // do nothing
-        } else if (block.num > 0) {
-            this.type = 'NUM';
-        }
-    }
-};
-
 function GameException (e) {
 
     switch (e) {
         case MINE_GAME_OVER:
-            WIDGET.render = RenderFunc_Main_GameOver;
             Refresh();
             break;
         case MINE_INVALID_POS:
@@ -357,11 +364,12 @@ function GameException (e) {
     }
 }
 
-BTN_START.render = function (painter) {
-    painter.drawImage(0, 0, RES.BTN_START);
-};
 
-BTN_START.onclick = GameStart;
+
+// ================================================
+// 输出
+// ================================================
+
 
 STATUS.render = function (painter) {
     // 剩余可用红旗数
@@ -375,6 +383,97 @@ STATUS.render = function (painter) {
     // Template String
     painter.drawText(10, 30, `${flagsLeft}`);
 };
+
+BTN_START.render = function (painter) {
+    painter.drawImage(0, 0, RES.BTN_START);
+};
+
+/**
+ * 绘制游戏主界面
+ */
+const RenderFunc_Main = function (painter) {
+
+    // 底图
+    painter.setBrush(COLOR_WINDOW_BG);
+    painter.fillRect(-2, -2, WIDGET.width + 4, WIDGET.height + 4);
+    painter.drawImage(0, 0, GROUND.IMAGE);
+
+    for (let y = 0; y < GROUND.rows; y ++) {
+        for (let x = 0; x < GROUND.cols; x ++) {
+
+            const block = GROUND.getBlock(x, y);
+
+            if (block.isBrick)
+                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.BRICK);
+
+            if (block.isFlag)
+                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.FLAG);
+        }
+    }
+
+    if (HOT.type === 'NUM') {
+
+        const surrounds = GROUND.surroundPositions(HOT.x, HOT.y);
+
+        for (const [x, y] of surrounds) {
+
+            const sr = GROUND.getBlock(x, y);
+
+            if (!sr.isFlag && sr.isBrick)
+                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.BRICK_REVERSE);
+        }
+    }
+};
+
+/**
+ * 绘制游戏主界面(游戏结束时)
+ */
+const RenderFunc_Main_GameOver = function (painter) {
+
+    // 底图
+    painter.setBrush(COLOR_WINDOW_BG);
+    painter.fillRect(-2, -2, WIDGET.width + 4, WIDGET.height + 4);
+    painter.drawImage(0, 0, GROUND.IMAGE);
+
+    for (let y = 0; y < GROUND.rows; y ++) {
+        for (let x = 0; x < GROUND.cols; x ++) {
+
+            const block = GROUND.getBlock(x, y);
+
+            // 判断红旗是否正确
+            if (block.isFlag) {
+                if (block.isBrick) 
+                    painter.drawImage(BOX_SIZE * x, BOX_SIZE *y, RES.BRICK);
+
+                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y,
+                        block.isMine ? RES.FLAG_HIT : RES.FLAG_MISS);
+            }
+            // 只有砖块
+            else if (block.isBrick) {
+                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y,
+                        block.isMine ? RES.BRICK_GLASS : RES.BRICK);
+            }
+        }
+    }
+};
+
+
+
+WIDGET.render = function (painter) {
+
+    if (isGameOver()) {
+        RenderFunc_Main_GameOver(painter);
+    } else {
+        RenderFunc_Main(painter);
+    }
+};
+
+
+// ================================================
+// 输入
+// ================================================
+
+BTN_START.onclick = GameStart;
 
 
 /**
@@ -464,74 +563,4 @@ WIDGET.oncontextmenu = function (x, y) {
         GameException(e);
     }
 };
-
-/**
- * 绘制游戏主界面
- */
-const RenderFunc_Main = function (painter) {
-
-    // 底图
-    painter.setBrush(COLOR_WINDOW_BG);
-    painter.fillRect(-2, -2, WIDGET.width + 4, WIDGET.height + 4);
-    painter.drawImage(0, 0, GROUND.IMAGE);
-
-    for (let y = 0; y < GROUND.rows; y ++) {
-        for (let x = 0; x < GROUND.cols; x ++) {
-
-            const block = GROUND.getBlock(x, y);
-
-            if (block.isBrick)
-                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.BRICK);
-
-            if (block.isFlag)
-                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.FLAG);
-        }
-    }
-
-    if (HOT.type === 'NUM') {
-
-        const surrounds = GROUND.surroundPositions(HOT.x, HOT.y);
-
-        for (const [x, y] of surrounds) {
-
-            const sr = GROUND.getBlock(x, y);
-
-            if (!sr.isFlag && sr.isBrick)
-                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.BRICK_REVERSE);
-        }
-    }
-};
-
-/**
- * 绘制游戏主界面(游戏结束时)
- */
-const RenderFunc_Main_GameOver = function (painter) {
-
-    // 底图
-    painter.setBrush(COLOR_WINDOW_BG);
-    painter.fillRect(-2, -2, WIDGET.width + 4, WIDGET.height + 4);
-    painter.drawImage(0, 0, GROUND.IMAGE);
-
-    for (let y = 0; y < GROUND.rows; y ++) {
-        for (let x = 0; x < GROUND.cols; x ++) {
-
-            const block = GROUND.getBlock(x, y);
-
-            // 判断红旗是否正确
-            if (block.isFlag) {
-                if (block.isBrick) 
-                    painter.drawImage(BOX_SIZE * x, BOX_SIZE *y, RES.BRICK);
-
-                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y,
-                        block.isMine ? RES.FLAG_HIT : RES.FLAG_MISS);
-            }
-            // 只有砖块
-            else if (block.isBrick) {
-                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y,
-                        block.isMine ? RES.BRICK_GLASS : RES.BRICK);
-            }
-        }
-    }
-};
-
 
