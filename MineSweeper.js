@@ -11,14 +11,6 @@
  */
 const MINE_GAME_OVER   = Symbol('game over');
 /**
- * 其他逻辑错误，违反规定操作
- *
- * 比如：
- * 1. 游戏已经开始，仍然尝试设置地雷
- */
-const MINE_LOGIC_ERROR = Symbol('logic error');
-
-/**
  * 游戏状态
  */
 const MINEST_PENDING = Symbol('status pending');
@@ -126,8 +118,9 @@ function ResetMines (max) {
 
     gGameStatus = MINEST_PENDING;
 
-    if (max > GROUND.size)
-        throw MINE_LOGIC_ERROR;
+    if (max > GROUND.size) {
+        throw new Error('严重错误, 设置地雷数量超过地图最大值');
+    }
 
     GROUND.placeMines(max);
     GROUND.ready();
@@ -138,51 +131,33 @@ function ResetMines (max) {
     // dict.has();
     // dict.add();
 
-    gMineCount = max;
-    gFlagsCount = 0;
-    gFlagsCountYes = 0;
-    gUncleanBricks = GROUND.size;
-    gGameStatus = MINEST_START;
+    gMineCount      = max;
+    gFlagsCount     = 0;
+    gFlagsCountYes  = 0;
+    gUncleanBricks  = GROUND.size;
+    gGameStatus     = MINEST_START;
 }
 
-// init ground ui
-function GameReady () {
-
-    const painter = new Painter(GROUND.IMAGE);
-
-    for (let j = 0; j < GROUND.rows; j ++) {
-        for (let i = 0; i < GROUND.cols; i ++) {
-
-            const block = GROUND.getBlock(i, j);
-
-            // draw ground.
-            painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, RES.GROUND);
-
-            if (block.isMine) {
-                // 显示地雷
-                painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, RES.MINE);
-            } else if (block.num > 0) {
-                // 显示数值
-                painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, RES.NUMS( block.num ));
-            }
-        }
-    }
-
-    STATUS.move(15, 15);
-    STATUS.resize(GROUND.width, 40);
-    BTN_START.move(STATUS.width/2-15, 5);
-
-    WIDGET.move(15, 15 + 50);
-    WIDGET.resize(GROUND.width, GROUND.height);
-}
 
 /**
  * 开始游戏
  */
 function GameStart () {
-    ResetMines(99);
-    GameReady();
-    Refresh();
+
+    try {
+        ResetMines(99);
+
+        STATUS.move(15, 15);
+        STATUS.resize(GROUND.width, 40);
+        BTN_START.move(STATUS.width/2-15, 5);
+
+        WIDGET.move(15, 15 + 50);
+        WIDGET.resize(GROUND.width, GROUND.height);
+
+        Refresh();
+    } catch (e) {
+        GameException(e);
+    }
 }
 
 
@@ -356,10 +331,10 @@ function GameException (e) {
         case MINE_INVALID_POS:
             alert('坐标超出范围');
             throw e;
-        case MINE_LOGIC_ERROR:
-            alert('严重错误');
-            throw e;
         default:
+            if (e instanceof Error) {
+                alert(e.message);
+            }
             throw e;
     }
 }

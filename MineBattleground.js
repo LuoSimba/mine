@@ -102,6 +102,28 @@ class MineBattleground {
             block.clearFlag();
             block.coverBrick();
         }
+
+
+        const painter = new Painter(this.IMAGE);
+
+        // 只需要绘制底图，不必绘制砖块和红旗
+        for (let j = 0; j < GROUND.rows; j ++) {
+            for (let i = 0; i < GROUND.cols; i ++) {
+
+                const block = GROUND.getBlock(i, j);
+
+                // draw ground.
+                painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, RES.GROUND);
+
+                if (block.isMine) {
+                    // 显示地雷
+                    painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, RES.MINE);
+                } else if (block.num > 0) {
+                    // 显示数值
+                    painter.drawImage(i * BOX_SIZE, j * BOX_SIZE, RES.NUMS( block.num ));
+                }
+            }
+        }
     }
 
     /**
