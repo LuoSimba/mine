@@ -53,9 +53,12 @@ MineSweep of JavaScript
 
 
 
-## 仅支持PC端，使用鼠标操作
-* 动画很耗电
-* 扫雷要用鼠标操作
+## 兼容性
+* 仅支持PC端
+** 不支持 Microsoft Edge 44.18362.449.0，因为 Edge 不支持类的书写格式如 'class a { b = null; }'
+** 不支持 IE11，因为不支持类定义如 'class a {}'
+* 仅支持使用鼠标操作
+
 
 
 ## TODO
