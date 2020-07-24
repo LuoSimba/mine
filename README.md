@@ -20,6 +20,7 @@ MineSweep of JavaScript
 ## changelog
 
 0724 - 标记为"?"
+       计算游戏时间
 
 0723 - 直观地显示胜利或者失败
 
@@ -66,5 +67,4 @@ MineSweep of JavaScript
 ## TODO
 
 * 鼠标拖动导致地图数据混乱
-* 没有时间计算
 

@@ -28,7 +28,6 @@ class Painter {
 
         // text
         this.ctx.textBaseline = 'top';   // middle
-        this.ctx.textAlign    = 'start'; // center
 
     }
 
@@ -48,8 +47,19 @@ class Painter {
         this.ctx.strokeStyle = pen;
     }
 
+    /**
+     * 矩形
+     */
     rect (x, y, w, h) {
         this.ctx.rect(x, y, w, h);
+    }
+
+    /**
+     * 圆
+     */
+    circle (x, y, radius) {
+        // (x, y, radius, startAngle, endAngle)
+        this.ctx.arc(x, y, radius, 0, Math.PI * 2);
     }
 
     /**
@@ -67,6 +77,14 @@ class Painter {
      */
     drawImage (x, y, img) {
         this.ctx.drawImage(img, x, y);
+    }
+
+
+    /**
+     * align is ('start', 'center', 'end', 'left', 'right')
+     */
+    setTextAlign (align) {
+        this.ctx.textAlign = align;
     }
 
     drawText (x, y, str) {
@@ -97,31 +115,22 @@ class Painter {
         //context.strokeRect()
         this.ctx.fillRect(x, y, w, h);
     }
+
+    // closePath
+    beginPath () {
+        this.ctx.beginPath();
+    }
+
+    /**
+     * bold 参数设置了缺省值
+     */
+    setFont (fontName, fontSize, bold = false) {
+
+        let boldexpr = (bold === true) ? 'bold ' : '';
+
+        /* bold 10px impack */
+        // Template String
+        this.ctx.font = `${boldexpr} ${fontSize}px ${fontName}`;
+    }
 }
-
-
-
-
-
-/**
- * bold 参数设置了缺省值
- */
-Painter.prototype.setFont = function (fontName, fontSize, bold = false) {
-
-    let boldexpr = (bold === true) ? 'bold ' : '';
-
-    /* bold 10px impack */
-    // Template String
-    this.ctx.font = `${boldexpr} ${fontSize}px ${fontName}`;
-};
-
-// closePath
-Painter.prototype.beginPath = function () {
-    this.ctx.beginPath();
-};
-
-Painter.prototype.circle = function (x, y, radius) {
-    // (x, y, radius, startAngle, endAngle)
-    this.ctx.arc(x, y, radius, 0, Math.PI * 2);
-};
 

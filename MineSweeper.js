@@ -46,6 +46,11 @@ let gFlagsCountYes = 0;
  * 剩余未清除砖块数量
  */
 let gUncleanBricks = 0;
+/**
+ * 游戏开始时间
+ */
+let gBeginTime = 0;
+let gScore     = 0;
 let gGameStatus = MINEST_PENDING;
 
 const GROUND = new MineBattleground(30, 16);
@@ -126,6 +131,16 @@ function ResetMines (max) {
     GROUND.ready();
 }
 
+/**
+ * 计算游戏开始到现在的时间间隔（秒）
+ */
+function CalcTime () {
+
+    let delta = (performance.now() - gBeginTime) / 1000 | 0;
+
+    return delta;
+}
+
 
 /**
  * 开始游戏
@@ -142,6 +157,7 @@ function GameStart () {
         gUncleanBricks  = GROUND.size;
 
         gGameStatus = MINEST_START;
+        gBeginTime = performance.now();
 
         STATUS.move(15, 15);
         STATUS.resize(GROUND.width, 40);
@@ -333,6 +349,7 @@ function GameException (e) {
     // 游戏结束
     // 游戏结束不是一个错误
     if (e === MINE_GAME_OVER) {
+        gScore = CalcTime();
         Refresh();
         return;
     }
@@ -354,6 +371,8 @@ function GameException (e) {
 STATUS.render = function (painter) {
     // 剩余可用红旗数
     const flagsLeft = gMineCount - gFlagsCount;
+    // 游戏时间
+    const sec = isGameOver() ? gScore : CalcTime();
 
     painter.setBrush(COLOR_WINDOW_BG);
     painter.fillRect(-2, -2, STATUS.width + 4, STATUS.height + 4);
@@ -361,7 +380,10 @@ STATUS.render = function (painter) {
     painter.setFont('compact', 20, true);
     painter.setBrush('black');
     // Template String
-    painter.drawText(10, 30, `${flagsLeft}`);
+    painter.drawText(10, 30, `Flag: ${flagsLeft}`);
+
+    painter.setTextAlign('end');
+    painter.drawText(STATUS.width - 10, 30, `Time: ${sec}`);
 };
 
 BTN_START.render = function (painter) {
@@ -461,6 +483,10 @@ WIDGET.render = function (painter) {
         RenderFunc_Main(painter);
     }
 };
+
+
+// 每秒刷新界面
+window.setInterval(Refresh, 1000);
 
 
 // ================================================
