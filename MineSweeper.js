@@ -114,7 +114,6 @@ function Refresh () {
  *
  * throw symbol
  */
-// 不再使用 Uint8Array(w, h), ArrayBuffer 作为数据存储
 function ResetMines (max) {
 
     gGameStatus = MINEST_PENDING;
@@ -125,18 +124,6 @@ function ResetMines (max) {
 
     GROUND.placeMines(max);
     GROUND.ready();
-
-
-    // ECMA 23.2 Set Object
-    //const dict = new Set;
-    // dict.has();
-    // dict.add();
-
-    gMineCount      = max;
-    gFlagsCount     = 0;
-    gFlagsCountYes  = 0;
-    gUncleanBricks  = GROUND.size;
-    gGameStatus     = MINEST_START;
 }
 
 
@@ -147,6 +134,14 @@ function GameStart () {
 
     try {
         ResetMines(99);
+
+        // reset data
+        gMineCount      = 99;
+        gFlagsCount     = 0;
+        gFlagsCountYes  = 0;
+        gUncleanBricks  = GROUND.size;
+
+        gGameStatus = MINEST_START;
 
         STATUS.move(15, 15);
         STATUS.resize(GROUND.width, 40);

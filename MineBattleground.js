@@ -1,4 +1,8 @@
 
+/**
+ * 扫雷地图
+ */
+// 不再使用 Uint8Array(w, h), ArrayBuffer 作为数据存储
 class MineBattleground {
 
     _wid = 0;
@@ -20,34 +24,80 @@ class MineBattleground {
                 hgt * BOX_SIZE);
     }
 
-    clearAll () {
+    /**
+     * 打乱次序
+     */
+    _shuffle () {
 
+        for (let range = this.size; range > 1; range --)
+        {
+            const lastPosition = range -1;
+
+            // choose which block?
+            const n = Util.rnd(range);
+
+            // swap n <-> lastPosition when n !== lastPosition
+            if (n !== lastPosition) {
+                const blockRef = this._data[ lastPosition ];
+                this._data[ lastPosition ] = this._data[ n ];
+                this._data[ n ] = blockRef;
+            }
+        }
+    }
+
+    /**
+     * 清除地下的地雷和数值，
+     * 不涉及红旗，砖块数据
+     */
+    clearGround () {
+
+        // ECMA 13.7 Iteration Statements
+        //
+        // for ... of ...
         for (const block of this._data) {
             block.isMine = false;
-            block.clearBrick();
-            block.clearMark();
             block.clearNum();
         }
     }
 
+    /**
+     * 重新安排地雷分布
+     */
     placeMines (max) {
 
-        this.clearAll();
+        this.clearGround();
 
-        // 在起始位置，放置足够的地雷
-        for (let i = 0; i < max; i ++)
-            this._data[ i ].isMine = true;
-
-        // 打乱次序
-        for (let limit = this.size; limit > 1; limit --)
+        // --------------
+        // 方法1
+        // --------------
+        if (true)
         {
-            const lastPosition = limit - 1;
-            const n = Util.rnd(limit);
-
-            const blockCopy = this._data[ lastPosition ];
-            this._data[ lastPosition ] = this._data[ n ];
-            this._data[ n ] = blockCopy;
+            // 在起始位置，放置足够的地雷
+            for (let i = 0; i < max; i ++) {
+                this._data[ i ].isMine = true;
+            }
+            this._shuffle();
         }
+        // --------------
+        // 方法2
+        // --------------
+        else
+        {
+            let mineCount = 0;
+            // ECMA 23.2 Set Object
+            const dict = new Set;
+
+            while (mineCount < max) {
+                const n = Util.rnd(this.size);
+
+                if (!dict.has(n)) {
+                    dict.add(n);
+                    this._data[ n ].isMine = true;
+                    mineCount ++;
+                }
+            }
+        }
+
 
         // 在地雷周围标上数值
         for (let j = 0; j < this.rows; j ++)
@@ -88,15 +138,12 @@ class MineBattleground {
     }
 
     ready () {
-        // ECMA 13.7 Iteration Statements
-        //
-        // for ... of ...
+
+        // remove all flags & cover with bricks
         for (const block of this._data) {
-            // remove all flags & cover with bricks
             block.clearMark();
             block.coverBrick();
         }
-
 
         const painter = new Painter(this.IMAGE);
 
