@@ -93,6 +93,10 @@ const RES = new class {
         return this.dict.get('flag-miss');
     }
 
+    get ASK () {
+        return this.dict.get('ask');
+    }
+
     get BOOM () {
         return this.dict.get('boom');
     }

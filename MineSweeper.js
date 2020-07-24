@@ -282,24 +282,34 @@ function ToggleFlag (x, y) {
     if (!block.isBrick)
         return;
 
+    // 红旗 -> 问号
     if (block.isFlag) 
     {
-        block.clearFlag();
+        block.setMarkAsk();
         gFlagsCount --;
 
         if (block.isMine)
             gFlagsCountYes --;
     }
-    // 红旗数量是有限资源，不能超过地雷数量
-    else if (gFlagsCount < gMineCount)
+    // 问号 -> 空地
+    else if (block.isAsk)
     {
-        block.setFlag();
-        gFlagsCount ++;
+        block.clearMark();
+    }
+    else
+    {
+        // 空地 -> 红旗：红旗数量是有限资源，不能超过地雷数量
+        if (gFlagsCount < gMineCount) {
+            block.setMarkFlag();
+            gFlagsCount ++;
 
-        if (block.isMine) {
-            gFlagsCountYes ++;
+            if (block.isMine) {
+                gFlagsCountYes ++;
 
-            CheckSuccess(); // throw
+                CheckSuccess(); // throw
+            }
+        } else {
+            block.setMarkAsk();
         }
     }
 
@@ -395,6 +405,8 @@ const RenderFunc_Main = function (painter) {
 
             if (block.isFlag)
                 painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.FLAG);
+            else if (block.isAsk)
+                painter.drawImage(BOX_SIZE * x, BOX_SIZE * y, RES.ASK);
         }
     }
 

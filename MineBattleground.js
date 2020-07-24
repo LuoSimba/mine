@@ -25,7 +25,7 @@ class MineBattleground {
         for (const block of this._data) {
             block.isMine = false;
             block.clearBrick();
-            block.clearFlag();
+            block.clearMark();
             block.clearNum();
         }
     }
@@ -93,7 +93,7 @@ class MineBattleground {
         // for ... of ...
         for (const block of this._data) {
             // remove all flags & cover with bricks
-            block.clearFlag();
+            block.clearMark();
             block.coverBrick();
         }
 
