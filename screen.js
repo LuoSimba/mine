@@ -20,7 +20,7 @@
  * 屏幕被分割成一块一块矩形区域(Window)单独管理
  */
 // ECMA 14.6 Class Definitions
-const SCREEN = new class {
+class GameScreen {
 
     device  = null;
     painter = null;
@@ -28,8 +28,28 @@ const SCREEN = new class {
 
     constructor () {
 
-        this.device = document.getElementById('SCREEN');  // hardcoded
+        const scr = document.createElement('canvas');
+        scr.style.display = 'block';
+        document.body.appendChild(scr);
+
+        this.device = scr;
         this.painter = new Painter(this.device);
+
+        this._init_device();
+
+
+        /* private */
+        const _fn_fullscreen = () => {
+
+            this.device.width  = window.innerWidth;
+            this.device.height = window.innerHeight;
+
+            this.update();
+        };
+
+        // 自动全屏显示
+        window.addEventListener('resize', _fn_fullscreen, true);
+        _fn_fullscreen();
     }
 
     /**
@@ -66,13 +86,6 @@ const SCREEN = new class {
         return null;
     }
 
-    fullScreen () {
-        this.device.width  = window.innerWidth;
-        this.device.height = window.innerHeight;
-
-        this.update();
-    }
-
     /**
      * redraw all windows
      */
@@ -90,86 +103,71 @@ const SCREEN = new class {
             this.painter.restore();
         }
     }
-};
 
+    _init_device()
+    {
+        this.device.onclick = (event) => {
+            // layerX  NO
+            // pageX   NO
+            // offsetX YES
+            const x = event.offsetX;
+            const y = event.offsetY;
 
+            const win = this.queryWindow(x, y);
+            if (win === null) return;
 
+            if (win.onclick !== null) { 
 
-// ==============================
-// INPUT
-// ==============================
+                win.onclick(x - win.x, y - win.y);
+            }
+        };
 
-SCREEN.device.onclick = function (event) {
-    // layerX  NO
-    // pageX   NO
-    // offsetX YES
-    const x = event.offsetX;
-    const y = event.offsetY;
+        /**
+         * 单击右键
+         */
+        this.device.oncontextmenu = (event) => {
 
-    const win = SCREEN.queryWindow(x, y);
-    if (win === null) return;
+            const x = event.offsetX;
+            const y = event.offsetY;
 
-    if (win.onclick !== null) { 
+            const win = this.queryWindow(x, y);
+            if (win === null) return;
 
-        win.onclick(x - win.x, y - win.y);
+            if (win.oncontextmenu !== null) {
+                win.oncontextmenu(x - win.x, y - win.y);
+                return false;
+            }
+        };
+
+        this.device.onmousedown = (event) => {
+
+            // only deal with left button down
+            if (event.button !== MOUSE_BTN_LEFT) return;
+
+            const x = event.offsetX;
+            const y = event.offsetY;
+
+            const win = this.queryWindow(x, y);
+            if (win === null) return;
+
+            if (win.onmousedown !== null) {
+                win.onmousedown(x - win.x, y - win.y);
+            }
+        };
+
+        this.device.onmouseup = (event) => {
+
+            const x = event.offsetX;
+            const y = event.offsetY;
+
+            const win = this.queryWindow(x, y);
+            if (win === null) return;
+
+            if (win.onmouseup !== null) {
+                win.onmouseup(x - win.x, y - win.y);
+            }
+        };
+
     }
-};
-
-/**
- * 单击右键
- */
-SCREEN.device.oncontextmenu = function (event) {
-
-    const x = event.offsetX;
-    const y = event.offsetY;
-
-    const win = SCREEN.queryWindow(x, y);
-    if (win === null) return;
-
-    if (win.oncontextmenu !== null) {
-        win.oncontextmenu(x - win.x, y - win.y);
-        return false;
-    }
-};
-
-
-SCREEN.device.onmousedown = function (event) {
-
-    // only deal with left button down
-    if (event.button !== MOUSE_BTN_LEFT) return;
-
-    const x = event.offsetX;
-    const y = event.offsetY;
-
-    const win = SCREEN.queryWindow(x, y);
-    if (win === null) return;
-
-    if (win.onmousedown !== null) {
-        win.onmousedown(x - win.x, y - win.y);
-    }
-};
-
-
-SCREEN.device.onmouseup = function (event) {
-
-    const x = event.offsetX;
-    const y = event.offsetY;
-
-    const win = SCREEN.queryWindow(x, y);
-    if (win === null) return;
-
-    if (win.onmouseup !== null) {
-        win.onmouseup(x - win.x, y - win.y);
-    }
-};
-
-// ==============================
-// BEHAVIOR
-// ==============================
-window.onresize = function () {
-
-    SCREEN.fullScreen();
-};
-SCREEN.fullScreen();
-
+}
 
