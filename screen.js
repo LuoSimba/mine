@@ -28,7 +28,11 @@ const SCREEN = new class {
 
     constructor () {
 
-        this.device = document.getElementById('SCREEN');  // hardcoded
+        const scr = document.createElement('canvas');
+        scr.style.display = 'block';
+        document.body.appendChild(scr);
+
+        this.device = scr;
         this.painter = new Painter(this.device);
     }
 
