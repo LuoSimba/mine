@@ -169,9 +169,5 @@ class GameScreen {
         };
 
     }
-};
-
-
-const SCREEN = new GameScreen;
-
+}
 
