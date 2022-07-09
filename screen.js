@@ -37,12 +37,19 @@ class GameScreen {
 
         this._init_device();
 
-        // 自动全屏显示
-        this.fullScreen();
 
-        window.addEventListener('resize', () => {
-            this.fullScreen();
-        }, true);
+        /* private */
+        const _fn_fullscreen = () => {
+
+            this.device.width  = window.innerWidth;
+            this.device.height = window.innerHeight;
+
+            this.update();
+        };
+
+        // 自动全屏显示
+        window.addEventListener('resize', _fn_fullscreen, true);
+        _fn_fullscreen();
     }
 
     /**
@@ -77,13 +84,6 @@ class GameScreen {
         }
 
         return null;
-    }
-
-    fullScreen () {
-        this.device.width  = window.innerWidth;
-        this.device.height = window.innerHeight;
-
-        this.update();
     }
 
     /**
